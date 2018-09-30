@@ -8,11 +8,16 @@
       "name": "(gdb) Launch",
       "type": "cppdbg",
       "request": "launch",
-      "program": "enter program name, for example ${workspaceFolder}/a.out",
+      "program": "${workspaceFolder}/build/ogre_tutorial_1",
       "args": [],
-      "stopAtEntry": false,
+      "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
-      "environment": [],
+      "environment": [
+        {
+          "name": "LD_LIBRARY_PATH",
+          "value": "/opt/ogre-1.11.2/lib"
+        }
+      ],
       "externalConsole": true,
       "MIMode": "gdb",
       "setupCommands": [

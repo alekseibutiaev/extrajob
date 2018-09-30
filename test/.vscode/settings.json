@@ -24,7 +24,4 @@
         "type_traits": "cpp",
         "typeinfo": "cpp"
     },
-    "cmake.configureSettings": {
-        "OGRE_HOME": "/opt/ogre-1.11.2/"
-    },
 }
