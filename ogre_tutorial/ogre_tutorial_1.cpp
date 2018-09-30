@@ -5,17 +5,24 @@
 #include <Ogre.h>
 #include <OgreConfigFile.h>
 #include <OgreMath.h>
+#include <OgreFrameListener.h>
 #include <OgreApplicationContext.h>
+#include <SampleContext.h>
 
-class base_application : public OgreBites::ApplicationContext,
-    public OgreBites::InputListener {
+class base_application : public OgreBites::SampleContext/*public OgreBites::ApplicationContext
+    , public OgreBites::InputListener
+    , public Ogre::FrameListener*/ {
 public:
   base_application();
   void setup();
   bool keyPressed(const OgreBites::KeyboardEvent& evt);
+  bool frameStarted(const Ogre::FrameEvent& evt);
+  bool frameEnded(const Ogre::FrameEvent& evt);
+private:
+  Ogre::SceneNode* node = 0;
 };
 
-base_application::base_application() : OgreBites::ApplicationContext("OgreTutorialApp")
+base_application::base_application() : OgreBites::SampleContext("OgreTutorialApp")
 {
 }
 
@@ -57,6 +64,7 @@ void base_application::setup(void)
 
   // get a pointer to the already created root
   Ogre::Root* root = getRoot();
+  root->addFrameListener(this);
   Ogre::SceneManager* scnMgr = root->createSceneManager();
 
   // register our scene with the RTSS
@@ -86,11 +94,30 @@ void base_application::setup(void)
 
   // finally something to render
   Ogre::Entity* ent = scnMgr->createEntity("ogrehead.mesh");
-  Ogre::SceneNode* node = scnMgr->getRootSceneNode()->createChildSceneNode();
+  node = scnMgr->getRootSceneNode()->createChildSceneNode();
   node->setPosition(0,0,0);
-  node->roll(Ogre::Degree(-60));
+  //node->roll(Ogre::Degree(-60));
   node->attachObject(ent);
 }
+
+bool base_application::frameStarted(const Ogre::FrameEvent& evt) {
+  static double angle = -180;
+  static int a = 0;
+  ++a;
+  if(0 != a % 20)
+    return true;
+  node->yaw(Ogre::Degree(angle));
+  if(angle > 180)
+    angle = -180;
+  else
+    angle += 1;
+  return true;  
+}
+
+bool base_application::frameEnded(const Ogre::FrameEvent& evt) {
+  return true;  
+}
+
 
 int main(int ac, char* av[]) {
   try {
