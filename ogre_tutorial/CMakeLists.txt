@@ -26,8 +26,6 @@ message("path: " ${CMAKE_MODULE_PATH})
 
 find_package(OGRE 1.10 REQUIRED)
 
-
-
 message("OGRE include dir is: "${OGRE_INCLUDE_DIRS})
 message("OGRE Link dir is: "${OGRE_LIBRARY_DIRS})
 message("OGRE Link dir is: "${OGRE_CONFIG_DIR})
@@ -35,7 +33,6 @@ message("OGRE Link dir is: "${OGRE_CONFIG_DIR})
 file(COPY ${OGRE_CONFIG_DIR}/resources.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
 project(ogre_tutorial)
-
 
 include_directories(
   ${OGRE_INCLUDE_DIRS}
@@ -67,6 +64,7 @@ include_directories(
 link_directories(${OGRE_LIBRARY_DIRS})
 
 add_executable(ogre_tutorial_1 ogre_tutorial_1.cpp)
+add_executable(ogre_tutorial_2 ogre_tutorial_2.cpp)
 
 target_link_libraries (ogre_tutorial_1
   OgreBites
@@ -80,3 +78,17 @@ target_link_libraries (ogre_tutorial_1
   OgreTerrain
   OgreVolume
 )
+
+target_link_libraries (ogre_tutorial_2
+  OgreBites
+  OgreHLMS
+  OgreMain
+  OgreMeshLodGenerator
+  OgreOverlay
+  OgrePaging
+  OgreProperty
+  OgreRTShaderSystem
+  OgreTerrain
+  OgreVolume
+)
+

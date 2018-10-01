@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "(gdb) Launch",
+      "name": "(gdb) Launch  ogre_tutorial_1",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/ogre_tutorial_1",
@@ -28,5 +28,29 @@
         }
       ]
     }
+    {
+      "name": "(gdb) Launch ogre_tutorial_2",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}//build/ogre_tutorial_2",
+      "args": [],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "LD_LIBRARY_PATH",
+          "value": "/opt/ogre-1.11.2/lib"
+        }
+      ],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "setupCommands": [
+          {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+          }
+      ]
+    },
   ]
 }
