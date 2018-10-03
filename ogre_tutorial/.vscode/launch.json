@@ -27,7 +27,7 @@
           "ignoreFailures": true
         }
       ]
-    }
+    },
     {
       "name": "(gdb) Launch ogre_tutorial_2",
       "type": "cppdbg",

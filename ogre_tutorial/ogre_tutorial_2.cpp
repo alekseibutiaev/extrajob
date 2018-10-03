@@ -236,10 +236,12 @@ void base_application::setup(void)
   Ogre::SceneNode* thisSceneNode = scnMgr->getRootSceneNode()->createChildSceneNode();
   thisSceneNode->setPosition(0, 0, -300);
   thisSceneNode->attachObject(thisEntity);
+  thisSceneNode->yaw(Ogre::Radian(1.0));
+  thisSceneNode->pitch(Ogre::Radian(1.0));
 #endif
 
 }
-
+#if 1
 bool base_application::frameStarted(const Ogre::FrameEvent& evt) {
   return true;  
 }
@@ -247,7 +249,7 @@ bool base_application::frameStarted(const Ogre::FrameEvent& evt) {
 bool base_application::frameEnded(const Ogre::FrameEvent& evt) {
   return true;  
 }
-
+#endif
 
 int main(int ac, char* av[]) {
   try {
