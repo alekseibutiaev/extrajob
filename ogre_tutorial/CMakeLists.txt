@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS_DEBUG "")
 set(CMAKE_CXX_FLAGS_RELEASE "")
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3 -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g0 -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3 -std=c++11 -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g0 -std=c++11 -Wall")
 
 if(WIN32)
 	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$ENV{OGRE_HOME}/CMake")
@@ -40,6 +40,7 @@ message("OGRE Libraries is: " ${OGRE_LIBRARIES})
 
 message("system has OIS: " ${OIS_FOUND})
 message("the OIS include directories: " ${OIS_INCLUDE_DIRS})
+message("the OIS library directories: " ${OIS_LIBRARY_DIRS})
 message("link these to use OIS: " ${OIS_LIBRARIES})
 
 #file(COPY ${OGRE_CONFIG_DIR}/resources.cfg DESTINATION ${CMAKE_BINARY_DIR})
@@ -54,6 +55,7 @@ include_directories(
 
 link_directories(
   ${OGRE_LIBRARY_DIRS}
+  ${OIS_LIBRARY_DIRS}
 )
 
 add_definitions(-DOGRE_HOME="${OGRE_HOME}")
@@ -70,24 +72,29 @@ add_executable(tutorial_4 tutorial_4.cpp)
 target_link_libraries (baseapp
   application
   ${OGRE_LIBRARIES}
+  ${OIS_LIBRARIES}
 )
 
 target_link_libraries (tutorial_1
   application
   ${OGRE_LIBRARIES}
+  ${OIS_LIBRARIES}
 )
 
 target_link_libraries (tutorial_2
   application
   ${OGRE_LIBRARIES}
+  ${OIS_LIBRARIES}
 )
 
 target_link_libraries (tutorial_3
   application
   ${OGRE_LIBRARIES}
+  ${OIS_LIBRARIES}
 )
 
 target_link_libraries (tutorial_4
   application
   ${OGRE_LIBRARIES}
+  ${OIS_LIBRARIES}
 )

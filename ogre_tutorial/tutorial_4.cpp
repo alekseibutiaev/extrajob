@@ -1,5 +1,6 @@
 #include <cmath>
 
+#include <memory>
 #include <iostream>
 #include <exception>
 
@@ -8,6 +9,9 @@
 #include <OgreConfigFile.h>
 #include <OgreMath.h>
 #include <OgreFrameListener.h>
+
+#include <OISMouse.h>
+#include <OISKeyboard.h>
 
 #include "application.h"
 
@@ -19,6 +23,12 @@ namespace {
 } /* namespace */
 
 namespace {
+
+  void sample_material() {
+    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
+      "Test/ColourTest1", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+      material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
+  }
 
   void slot_machine() {
     const static std::size_t face_count = 36;
@@ -115,15 +125,6 @@ namespace {
     Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
       "Test/ColourTest1", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
       material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
-
-  #if 0
-    Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("SpotWheel", "General");
-
-
-    /// Set vertex buffer binding so buffer 0 is bound to our vertex buffer
-    Ogre::VertexBufferBinding* bind = msh->sharedVertexData->vertexBufferBinding; 
-    bind->setBinding(0, vbuf);
-  #endif
   }
 
   void createColourCube()
@@ -249,22 +250,34 @@ namespace {
 
     /// Notify -Mesh object that it has been loaded
     msh->load();
-
-    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
-      "Test/ColourTest", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-      material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
   }
 
 } /* namespace */
 
-class tutorial4 : public Application {
+class tutorial4
+    : public Application {
 public:
   tutorial4();
   void createScene() override;
 private:
+  bool mouse_moved(const OIS::MouseEvent& value);
+	bool mouse_pressed(const OIS::MouseEvent& value, OIS::MouseButtonID id);
+	bool mouse_released(const OIS::MouseEvent& value, OIS::MouseButtonID id);
+  bool key_pressed(const OIS::KeyEvent& value);
+	bool key_released(const OIS::KeyEvent& value);
 };
 
 tutorial4::tutorial4() : Application("plugins.cfg", "resources-1.9.cfg") {
+  start_input();
+  key_listener_ptr kl = key_listener_ptr(new key_listener_ptr::element_type());
+  kl->m_pressed = [&](const OIS::KeyEvent& value){return key_pressed(value);};
+  kl->m_released = [&](const OIS::KeyEvent& value){return key_released(value);};
+  set_key_listner(std::move(kl));
+  mouse_listener_ptr ml = mouse_listener_ptr(new mouse_listener_ptr::element_type());
+  ml->m_move = [&](const OIS::MouseEvent& value){return mouse_moved(value);};
+  ml->m_pressed = [&](const OIS::MouseEvent& value, OIS::MouseButtonID id){return mouse_pressed(value, id);};
+  ml->m_released = [&](const OIS::MouseEvent& value, OIS::MouseButtonID id){return mouse_released(value, id);};
+  set_mouse_listner(std::move(ml));
 }
 
 void tutorial4::createScene()
@@ -285,14 +298,14 @@ void tutorial4::createScene()
   Ogre::Light* light = sceneManager->createLight("MainLight");
   light->setPosition(0.0f, 0.0f, 120.0f);
 
-
+  sample_material();
   createColourCube();
   slot_machine();
   Ogre::Entity* thisEntity = sceneManager->createEntity("cc", "SpotWheel");
   thisEntity->setMaterialName("Test/ColourTest");
   Ogre::SceneNode* thisSceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
   thisSceneNode->setPosition(0, 0, -300);
-//  thisSceneNode->yaw(Ogre::Radian(1.0));
+  //  thisSceneNode->yaw(Ogre::Radian(1.0));
   thisSceneNode->pitch(Ogre::Radian(1.0));
   thisSceneNode->attachObject(thisEntity);
 #if 0
@@ -305,6 +318,26 @@ void tutorial4::createScene()
   thisSceneNode->yaw(Ogre::Radian(1.0));
   thisSceneNode->pitch(Ogre::Radian(1.0));
 #endif
+}
+
+bool tutorial4::mouse_moved(const OIS::MouseEvent &arg ) {
+  return true;
+}
+
+bool tutorial4::mouse_pressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id ) {
+  return true;
+}
+
+bool tutorial4::mouse_released( const OIS::MouseEvent &arg, OIS::MouseButtonID id ) {
+  return true;
+}
+
+bool tutorial4::key_pressed(const OIS::KeyEvent &arg) {
+  return true;
+}
+
+bool tutorial4::key_released(const OIS::KeyEvent &arg) {
+  return true;
 }
 
 int main(int ac, char* av[]) {
