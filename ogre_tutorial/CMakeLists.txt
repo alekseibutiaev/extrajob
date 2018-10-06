@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
+project(ogre_tutorial)
+
 set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_CXX_FLAGS_DEBUG "")
@@ -13,8 +15,10 @@ if(WIN32)
 elseif(UNIX)
 	if(EXISTS "/usr/local/lib/OGRE/cmake")
 	  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/local/lib/OGRE/cmake")
+    set(OGRE_HOME "/usr/local/include/OGRE")
 	elseif(EXISTS "/usr/lib/OGRE/cmake")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/lib/OGRE/cmake")
+    set(OGRE_HOME "/usr/include/OGRE")
   elseif(DEFINED OGRE_HOME AND EXISTS "${OGRE_HOME}/lib/OGRE/cmake")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${OGRE_HOME}/lib/OGRE/cmake")
 	else (EXISTS "/usr/local/lib/OGRE/cmake")
@@ -24,85 +28,83 @@ endif(WIN32)
 
 message("path: " ${CMAKE_MODULE_PATH})
 
-find_package(OGRE 1.9 REQUIRED)
+message("OGRE_HOME: " ${OGRE_HOME})
 
-message("OGRE include dir is: "${OGRE_INCLUDE_DIRS})
-message("OGRE Link dir is: "${OGRE_LIBRARY_DIRS})
-message("OGRE Link dir is: "${OGRE_CONFIG_DIR})
+find_package(OIS REQUIRED)
+find_package(OGRE  REQUIRED)
 
-file(COPY ${OGRE_CONFIG_DIR}/resources.cfg DESTINATION ${CMAKE_BINARY_DIR})
+message("OGRE dounf is: " ${OGRE_FOUND})
+message("OGRE include dir is: " ${OGRE_INCLUDE_DIRS})
+message("OGRE Link dir is: " ${OGRE_LIBRARY_DIRS})
+message("OGRE Libraries is: " ${OGRE_LIBRARIES})
 
-project(ogre_tutorial)
+message("system has OIS: " ${OIS_FOUND})
+message("the OIS include directories: " ${OIS_INCLUDE_DIRS})
+message("link these to use OIS: " ${OIS_LIBRARIES})
+
+#file(COPY ${OGRE_CONFIG_DIR}/resources.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
 include_directories(
-  ${OGRE_INCLUDE_DIRS}
-  ${OGRE_INCLUDE_DIRS}/Property
-  ${OGRE_INCLUDE_DIRS}/Volume
-  ${OGRE_INCLUDE_DIRS}/HLMS
-  ${OGRE_INCLUDE_DIRS}/MeshLodGenerator
-  ${OGRE_INCLUDE_DIRS}/Bites
-  ${OGRE_INCLUDE_DIRS}/Overlay
-  ${OGRE_INCLUDE_DIRS}/Plugins
-  ${OGRE_INCLUDE_DIRS}/Plugins/OctreeZone
-  ${OGRE_INCLUDE_DIRS}/Plugins/BSPSceneManager
-  ${OGRE_INCLUDE_DIRS}/Plugins/FreeImageCodec
-  ${OGRE_INCLUDE_DIRS}/Plugins/ParticleFX
-  ${OGRE_INCLUDE_DIRS}/Plugins/PCZSceneManager
-  ${OGRE_INCLUDE_DIRS}/Plugins/OctreeSceneManager
-  ${OGRE_INCLUDE_DIRS}/Plugins/STBICodec
-  ${OGRE_INCLUDE_DIRS}/Terrain
-  ${OGRE_INCLUDE_DIRS}/RenderSystems
-  ${OGRE_INCLUDE_DIRS}/RenderSystems/GL3Plus
-  ${OGRE_INCLUDE_DIRS}/RenderSystems/GL3Plus/GL
-  ${OGRE_INCLUDE_DIRS}/RenderSystems/GL
-  ${OGRE_INCLUDE_DIRS}/RenderSystems/GL/GL
-  ${OGRE_INCLUDE_DIRS}/RTShaderSystem
-  ${OGRE_INCLUDE_DIRS}/Threading
-  ${OGRE_INCLUDE_DIRS}/Paging
+  ${OGRE_HOME}/include/OGRE
+  ${OGRE_HOME}/include/OGRE/RenderSystems/GL
+  ${OGRE_HOME}/include/OGRE/Plugins/ParticleFX
+
+  ${OIS_INCLUDE_DIRS}
 )
 
-link_directories(${OGRE_LIBRARY_DIRS})
-
-add_executable(ogre_tutorial_1 ogre_tutorial_1.cpp)
-add_executable(ogre_tutorial_2 ogre_tutorial_2.cpp)
-add_executable(ogre_tutorial_3 ogre_tutorial_3.cpp)
-
-target_link_libraries (ogre_tutorial_1
-  OgreBites
-  OgreHLMS
-  OgreMain
-  OgreMeshLodGenerator
-  OgreOverlay
-  OgrePaging
-  OgreProperty
-  OgreRTShaderSystem
-  OgreTerrain
-  OgreVolume
+link_directories(
+  ${OGRE_LIBRARY_DIRS}
 )
 
-target_link_libraries (ogre_tutorial_2
-  OgreBites
-  OgreHLMS
-  OgreMain
-  OgreMeshLodGenerator
-  OgreOverlay
-  OgrePaging
-  OgreProperty
-  OgreRTShaderSystem
-  OgreTerrain
-  OgreVolume
+add_definitions(-DOGRE_HOME="${OGRE_HOME}")
+
+add_executable(application application.cpp)
+
+
+#add_executable(ogre_tutorial_1 ogre_tutorial_1.cpp)
+#add_executable(ogre_tutorial_2 ogre_tutorial_2.cpp)
+#add_executable(ogre_tutorial_3 ogre_tutorial_3.cpp)
+
+target_link_libraries (application
+  ${OGRE_LIBRARIES}
 )
 
-target_link_libraries (ogre_tutorial_3
-  OgreBites
-  OgreHLMS
-  OgreMain
-  OgreMeshLodGenerator
-  OgreOverlay
-  OgrePaging
-  OgreProperty
-  OgreRTShaderSystem
-  OgreTerrain
-  OgreVolume
-)
+#target_link_libraries (ogre_tutorial_1
+#  OgreBites
+#  OgreHLMS
+#  OgreMain
+#  OgreMeshLodGenerator
+#  OgreOverlay
+#  OgrePaging
+#  OgreProperty
+#  OgreRTShaderSystem
+#  OgreTerrain
+#  OgreVolume
+#)
+
+#target_link_libraries (ogre_tutorial_2
+#  OgreBites
+#  OgreHLMS
+#  OgreMain
+#  OgreMeshLodGenerator
+#  OgreOverlay
+#  OgrePaging
+#  OgreProperty
+#  OgreRTShaderSystem
+#  OgreTerrain
+#  OgreVolume
+#)
+
+#target_link_libraries (ogre_tutorial_3
+#  OgreBites
+#  OgreHLMS
+#  OgreMain
+#  OgreMeshLodGenerator
+#  OgreOverlay
+#  OgrePaging
+#  OgreProperty
+#  OgreRTShaderSystem
+#  OgreTerrain
+#  OgreVolume
+#)
 

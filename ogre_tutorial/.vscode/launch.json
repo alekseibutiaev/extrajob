@@ -77,5 +77,29 @@
           }
       ]
     },
+    {
+      "name": "(gdb) Launch application",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/application",
+      "args": [],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "LD_LIBRARY_PATH",
+          "value": "/opt/ogre-1.9/lib"
+        }
+      ],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "setupCommands": [
+          {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+          }
+      ]
+    },
   ]
 }
