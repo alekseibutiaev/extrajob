@@ -12,8 +12,7 @@ namespace Ogre
     class Camera;
 }
 
-class Application
-{
+class Application {
 public:
     Application(const Ogre::String& plugin_config,
       const Ogre::String& resource_config);
@@ -28,14 +27,17 @@ public:
       const bool full_screen = false, const Ogre::NameValuePairList* params = &Application::defparam );
     void parseResourceFileConfiguration();
     void initializeResources();
-    virtual void createScene();
+
 public:
     static const Ogre::NameValuePairList defparam;
-private:
+protected:
+    virtual void createScene();
+    Ogre::SceneManager* create_scene_manager();
+    Ogre::RenderWindow* get_render_window();
+protected:
     const Ogre::String m_plugin_config;
     const Ogre::String m_resource_config;
     std::unique_ptr<Ogre::Root> root;
-    Ogre::RenderWindow* renderWindow;
-    Ogre::SceneManager* sceneManager;
-    Ogre::Camera* camera;
+private:
+    Ogre::RenderWindow* m_renderWindow;
 };

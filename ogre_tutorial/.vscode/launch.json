@@ -6,17 +6,17 @@
   "configurations": [
 
     {
-      "name": "(gdb) Launch  ogre_tutorial_1",
+      "name": "(gdb) Launch  tutorial_1",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/ogre_tutorial_1",
+      "program": "${workspaceFolder}/build/tutorial_1",
       "args": [],
       "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
       "environment": [
         {
           "name": "LD_LIBRARY_PATH",
-          "value": "/opt/ogre-1.11.2/lib"
+          "value": "/opt/ogre-1.9/lib"
         }
       ],
       "externalConsole": true,
@@ -30,17 +30,17 @@
       ]
     },
     {
-      "name": "(gdb) Launch ogre_tutorial_2",
+      "name": "(gdb) Launch tutorial_2",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/ogre_tutorial_2",
+      "program": "${workspaceFolder}/build/tutorial_2",
       "args": [],
       "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
       "environment": [
         {
           "name": "LD_LIBRARY_PATH",
-          "value": "/opt/ogre-1.11.2/lib"
+          "value": "/opt/ogre-1.9/lib"
         }
       ],
       "externalConsole": true,

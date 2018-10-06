@@ -34,17 +34,13 @@ Application::~Application()
 
 void Application::startApplication()
 {
-//    root = new Ogre::Root(plugin_config, Ogre::StringUtil::BLANK );
-
   loadPlugins();
   setRenderSystem();
   initializeRenderSystem();
   createRenderWindow();
   parseResourceFileConfiguration();
   initializeResources();
-
   createScene();
-
   root->startRendering();
 }
 
@@ -85,23 +81,7 @@ void Application::createRenderWindow(const Ogre::String title,
       const unsigned int width, const unsigned int height,
       const bool full_screen, const Ogre::NameValuePairList* params)
 {
-#if 0
-  Ogre::String windowTitle = title;
-  unsigned int windowSizeX = width;
-  unsigned int WindowSizeY = height;
-  bool isFullscreen = full_screen;
-#endif
-#if 1
-  Ogre::NameValuePairList additionalParameters;
-  additionalParameters["FSAA"] = "0";
-  additionalParameters["VSync"]="No";
-  additionalParameters["macAPICocoaUseNSView"] = "true";
-  additionalParameters["FSAAH"] = "Quality";
-  additionalParameters["contentScalingFactor"] = "1";
-  additionalParameters["displayFrequency"] = "0";
-  additionalParameters["macAPI"] = "cocoa";
-#endif
-  renderWindow = root->createRenderWindow( title, width, height, full_screen, &additionalParameters );
+  m_renderWindow = root->createRenderWindow( title, width, height, full_screen, params);
 }
 
 void Application::initializeResources()
@@ -196,28 +176,37 @@ void Application::parseResourceFileConfiguration()
 
 void Application::createScene()
 {
-    sceneManager = root->createSceneManager(Ogre::ST_GENERIC);
-    sceneManager->setAmbientLight( Ogre::ColourValue( 0.5, 0.5, 0.5 ) );
+  Ogre::SceneManager* sceneManager = create_scene_manager();
+  sceneManager->setAmbientLight( Ogre::ColourValue( 0.5, 0.5, 0.5 ) );
 
-    camera = sceneManager->createCamera("PlayerCam");
-    camera->setPosition(0, 0, 120);
-    camera->setNearClipDistance( 5 );
+  Ogre::Camera* camera = sceneManager->createCamera("PlayerCam");
+  camera->setPosition(0, 0, 120);
+  camera->setNearClipDistance( 5 );
 
-    Ogre::Viewport* viewPort = renderWindow->addViewport( camera );
-    viewPort->setBackgroundColour( Ogre::ColourValue( 0, 0, 0 ) );
-    camera->setAspectRatio( Ogre::Real( viewPort->getActualWidth() ) / Ogre::Real( viewPort->getActualHeight() ) );
+  Ogre::Viewport* viewPort = get_render_window()->addViewport( camera );
+  viewPort->setBackgroundColour( Ogre::ColourValue( 0, 0, 0 ) );
+  camera->setAspectRatio( Ogre::Real( viewPort->getActualWidth() ) / Ogre::Real( viewPort->getActualHeight() ) );
 
-    // Create a Light and set its position
-    Ogre::Light* light = sceneManager->createLight("MainLight");
-    light->setPosition(20.0f, 80.0f, 50.0f);
+  // Create a Light and set its position
+  Ogre::Light* light = sceneManager->createLight("MainLight");
+  light->setPosition(20.0f, 80.0f, 50.0f);
 
-    // Create an Entity
-    Ogre::Entity* ogreHead = sceneManager->createEntity("Head", "ogrehead.mesh");
-    // Create a SceneNode and attach the Entity to it
-    Ogre::SceneNode* headNode = sceneManager->getRootSceneNode()->createChildSceneNode("HeadNode");
-    headNode->attachObject(ogreHead);
+  // Create an Entity
+  Ogre::Entity* ogreHead = sceneManager->createEntity("Head", "ogrehead.mesh");
+  // Create a SceneNode and attach the Entity to it
+  Ogre::SceneNode* headNode = sceneManager->getRootSceneNode()->createChildSceneNode("HeadNode");
+  headNode->attachObject(ogreHead);
 }
 
+Ogre::SceneManager* Application::create_scene_manager() {
+  return root->createSceneManager(Ogre::ST_GENERIC);    
+}
+
+Ogre::RenderWindow* Application::get_render_window() {
+  return m_renderWindow;
+}
+
+#if 0
 int main()
 {
   try
@@ -230,3 +219,4 @@ int main()
   }
   return 0;
 }
+#endif
