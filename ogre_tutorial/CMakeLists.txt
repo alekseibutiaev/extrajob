@@ -31,7 +31,7 @@ message("path: " ${CMAKE_MODULE_PATH})
 message("OGRE_HOME: " ${OGRE_HOME})
 
 find_package(OIS REQUIRED)
-find_package(OGRE  REQUIRED)
+find_package(OGRE 1.9 REQUIRED)
 
 message("OGRE dounf is: " ${OGRE_FOUND})
 message("OGRE include dir is: " ${OGRE_INCLUDE_DIRS})
@@ -61,24 +61,33 @@ add_definitions(-DOGRE_HOME="${OGRE_HOME}")
 add_library(application STATIC application.cpp)
 
 
+add_executable(baseapp baseapp.cpp)
 add_executable(tutorial_1 tutorial_1.cpp)
 add_executable(tutorial_2 tutorial_2.cpp)
 add_executable(tutorial_3 tutorial_3.cpp)
+add_executable(tutorial_4 tutorial_4.cpp)
 
-#target_link_libraries (application
-#)
+target_link_libraries (baseapp
+  application
+  ${OGRE_LIBRARIES}
+)
 
 target_link_libraries (tutorial_1
-  ${OGRE_LIBRARIES}
   application
+  ${OGRE_LIBRARIES}
 )
 
 target_link_libraries (tutorial_2
-  ${OGRE_LIBRARIES}
   application
+  ${OGRE_LIBRARIES}
 )
 
 target_link_libraries (tutorial_3
-  ${OGRE_LIBRARIES}
   application
+  ${OGRE_LIBRARIES}
+)
+
+target_link_libraries (tutorial_4
+  application
+  ${OGRE_LIBRARIES}
 )

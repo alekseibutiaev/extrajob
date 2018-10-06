@@ -145,12 +145,9 @@ class tutorial2 : public Application {
 public:
   tutorial2();
   void createScene() override;
-private:
-  Ogre::SceneNode* node = 0;
 };
 
 tutorial2::tutorial2() : Application("plugins.cfg", "resources-1.9.cfg") {
-
 }
 
 void tutorial2::createScene()
@@ -169,8 +166,6 @@ void tutorial2::createScene()
   // Create a Light and set its position
   Ogre::Light* light = sceneManager->createLight("MainLight");
   light->setPosition(20.0f, 80.0f, 50.0f);
-
-
 #if 0
   // finally something to render
   Ogre::Entity* ent = sceneManager->createEntity("ogrehead.mesh");
@@ -182,11 +177,11 @@ void tutorial2::createScene()
   createColourCube();
   Ogre::Entity* thisEntity = sceneManager->createEntity("cc", "ColourCube");
   thisEntity->setMaterialName("Test/ColourTest");
-  Ogre::SceneNode* thisSceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
-  thisSceneNode->setPosition(0, 0, -300);
-  thisSceneNode->attachObject(thisEntity);
-  thisSceneNode->yaw(Ogre::Radian(1.0));
-  thisSceneNode->pitch(Ogre::Radian(1.0));
+  Ogre::SceneNode* node = sceneManager->getRootSceneNode()->createChildSceneNode();
+  node->setPosition(0, 0, -300);
+  node->attachObject(thisEntity);
+  node->yaw(Ogre::Radian(1.0));
+  node->pitch(Ogre::Radian(1.0));
 #endif
 }
 

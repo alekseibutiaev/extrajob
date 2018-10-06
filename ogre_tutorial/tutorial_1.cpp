@@ -12,14 +12,10 @@
 class tutorial1 : public Application {
 public:
   tutorial1();
-  void setup();
   void createScene() override;
-private:
-  Ogre::SceneNode* node = 0;
 };
 
-tutorial1::tutorial1() : Application("plugins.cfg","resources-1.9.cfg")
-{
+tutorial1::tutorial1() : Application("plugins.cfg","resources-1.9.cfg"){
 }
 
 void tutorial1::createScene()
@@ -54,7 +50,7 @@ void tutorial1::createScene()
 
   // finally something to render
   Ogre::Entity* ent = scnMgr->createEntity("ogrehead.mesh");
-  node = scnMgr->getRootSceneNode()->createChildSceneNode();
+  Ogre::SceneNode* node = scnMgr->getRootSceneNode()->createChildSceneNode();
   node->setPosition(0,0,0);
   node->roll(Ogre::Degree(-60));
   node->attachObject(ent);

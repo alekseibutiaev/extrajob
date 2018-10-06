@@ -26,7 +26,6 @@ namespace {
     const static double wheel_xpos = 0;
     const static double wheel_width = 20.0;
     const static double radius = 50;
-    //std::ofstream o("test.txt");
 
     Ogre::Vector3 vertices[face_count][2][2];
     unsigned short faces[face_count][2][3];
@@ -46,8 +45,6 @@ namespace {
       rs->convertColourValue(Ogre::ColourValue(dd & 1, dd & 2, dd & 4), &colours[i][0]);
       rs->convertColourValue(Ogre::ColourValue(dd & 4, dd & 2, dd & 1), &colours[i][1]);
 
-      //o << x << ';' << y << std::endl;
-
       const unsigned short ii = i * 2;
       faces[i][0][0] = ii;
       faces[i][0][1] = (ii + 3) % (face_count * 2);
@@ -55,12 +52,6 @@ namespace {
       faces[i][1][0] = ii;
       faces[i][1][1] = (ii + 2) % (face_count * 2);
       faces[i][1][2] = (ii + 3) % (face_count * 2);
-//      o << faces[i][0][0] << " ";
-//      o << faces[i][0][1] << " ";
-//      o << faces[i][0][2] << std::endl;
-//      o << faces[i][1][0] << " ";
-//      o << faces[i][1][1] << " ";
-//      o << faces[i][1][2] << std::endl;
     }
 
     Ogre::VertexData* wd = new Ogre::VertexData();
@@ -266,16 +257,17 @@ namespace {
 
 } /* namespace */
 
-class tutorial3 : public Application {
+class tutorial4 : public Application {
 public:
-  tutorial3();
+  tutorial4();
   void createScene() override;
+private:
 };
 
-tutorial3::tutorial3() : Application("plugins.cfg", "resources-1.9.cfg") {
+tutorial4::tutorial4() : Application("plugins.cfg", "resources-1.9.cfg") {
 }
 
-void tutorial3::createScene()
+void tutorial4::createScene()
 {
   Ogre::SceneManager* sceneManager = create_scene_manager();
   sceneManager->setAmbientLight( Ogre::ColourValue( 0.5, 0.5, 0.5 ) );
@@ -317,7 +309,7 @@ void tutorial3::createScene()
 
 int main(int ac, char* av[]) {
   try {
-    tutorial3 app;
+    tutorial4 app;
     app.startApplication();
     return 0;
   }
