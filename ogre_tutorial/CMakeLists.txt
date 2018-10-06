@@ -58,42 +58,25 @@ link_directories(
 
 add_definitions(-DOGRE_HOME="${OGRE_HOME}")
 
-add_executable(application application.cpp)
+add_library(application STATIC application.cpp)
 
 
-#add_executable(ogre_tutorial_1 ogre_tutorial_1.cpp)
-#add_executable(ogre_tutorial_2 ogre_tutorial_2.cpp)
+add_executable(tutorial_1 tutorial_1.cpp)
+add_executable(tutorial_2 tutorial_2.cpp)
 #add_executable(ogre_tutorial_3 ogre_tutorial_3.cpp)
 
-target_link_libraries (application
+#target_link_libraries (application
+#)
+
+target_link_libraries (tutorial_1
   ${OGRE_LIBRARIES}
+  application
 )
 
-#target_link_libraries (ogre_tutorial_1
-#  OgreBites
-#  OgreHLMS
-#  OgreMain
-#  OgreMeshLodGenerator
-#  OgreOverlay
-#  OgrePaging
-#  OgreProperty
-#  OgreRTShaderSystem
-#  OgreTerrain
-#  OgreVolume
-#)
-
-#target_link_libraries (ogre_tutorial_2
-#  OgreBites
-#  OgreHLMS
-#  OgreMain
-#  OgreMeshLodGenerator
-#  OgreOverlay
-#  OgrePaging
-#  OgreProperty
-#  OgreRTShaderSystem
-#  OgreTerrain
-#  OgreVolume
-#)
+target_link_libraries (tutorial_2
+  ${OGRE_LIBRARIES}
+  application
+)
 
 #target_link_libraries (ogre_tutorial_3
 #  OgreBites
