@@ -63,7 +63,7 @@ add_library(application STATIC application.cpp)
 
 add_executable(tutorial_1 tutorial_1.cpp)
 add_executable(tutorial_2 tutorial_2.cpp)
-#add_executable(ogre_tutorial_3 ogre_tutorial_3.cpp)
+add_executable(tutorial_3 tutorial_3.cpp)
 
 #target_link_libraries (application
 #)
@@ -78,16 +78,7 @@ target_link_libraries (tutorial_2
   application
 )
 
-#target_link_libraries (ogre_tutorial_3
-#  OgreBites
-#  OgreHLMS
-#  OgreMain
-#  OgreMeshLodGenerator
-#  OgreOverlay
-#  OgrePaging
-#  OgreProperty
-#  OgreRTShaderSystem
-#  OgreTerrain
-#  OgreVolume
-#)
-
+target_link_libraries (tutorial_3
+  ${OGRE_LIBRARIES}
+  application
+)

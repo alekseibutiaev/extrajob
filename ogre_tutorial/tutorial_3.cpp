@@ -1,146 +1,142 @@
 #include <cmath>
 
 #include <iostream>
-#include <fstream>
 #include <exception>
 
 #include <Ogre.h>
+#include <OgreRoot.h>
 #include <OgreConfigFile.h>
 #include <OgreMath.h>
 #include <OgreFrameListener.h>
-#include <OgreApplicationContext.h>
-#include <SampleContext.h>
+
+#include "application.h"
 
 namespace {
   template<typename T, std::size_t N>
   std::size_t array_size(T(&)[N]) {
     return N;
   }
-
-
 } /* namespace */
 
+namespace {
 
-void slot_mashina() {
-  const static std::size_t face_count = 3;
-  const static double step = 2 * M_PI / face_count;
-  const static double wheel_xpos = 0;
-  const static double wheel_width = 60.0;
-  const static double radius = 300;
-  std::ofstream o("test.txt");
+  void slot_machine() {
+    const static std::size_t face_count = 36;
+    const static double step = 2 * M_PI / face_count;
+    const static double wheel_xpos = 0;
+    const static double wheel_width = 20.0;
+    const static double radius = 50;
+    //std::ofstream o("test.txt");
 
-  Ogre::Vector3 vertices[face_count][2][2];
-  unsigned short faces[face_count][2][3];
-  Ogre::RGBA colours[face_count][2];
-  Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
+    Ogre::Vector3 vertices[face_count][2][2];
+    unsigned short faces[face_count][2][3];
+    Ogre::RGBA colours[face_count][2];
+    Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
 
-  double rad = -M_PI;
-  for(size_t i = 0; i < face_count; ++i) {
-    const double x = std::cos(rad);
-    const double y = std::sin(rad);
-    rad += step;
-    vertices[i][0][0] = Ogre::Vector3(wheel_xpos, y * radius, x * radius);
-    vertices[i][1][0] = Ogre::Vector3(wheel_xpos + wheel_width, y * radius, x * radius);
-    vertices[i][0][1] = Ogre::Vector3(0,0,1);
-    vertices[i][1][1] = Ogre::Vector3(0,0,1);
-    rs->convertColourValue(Ogre::ColourValue(1.0,0.0,0.0), &colours[i][0]);
-    rs->convertColourValue(Ogre::ColourValue(1.0,0.0,0.0), &colours[i][1]);
+    double rad = -M_PI;
+    for(size_t i = 0; i < face_count; ++i) {
+      const double x = std::cos(rad);
+      const double y = std::sin(rad);
+      rad += step;
+      vertices[i][0][0] = Ogre::Vector3(wheel_xpos, y * radius, x * radius);
+      vertices[i][1][0] = Ogre::Vector3(wheel_xpos + wheel_width, y * radius, x * radius);
+      vertices[i][0][1] = Ogre::Vector3(0,0,1);
+      vertices[i][1][1] = Ogre::Vector3(0,0,1);
+      const int dd = i % 7; 
+      rs->convertColourValue(Ogre::ColourValue(dd & 1, dd & 2, dd & 4), &colours[i][0]);
+      rs->convertColourValue(Ogre::ColourValue(dd & 4, dd & 2, dd & 1), &colours[i][1]);
 
-    o << x << ';' << y << std::endl;
+      //o << x << ';' << y << std::endl;
 
-    const unsigned short ii = i * 2;
-    faces[i][0][0] = ii;
-    faces[i][0][1] = ii + 3;
-    faces[i][0][2] = ii + 1;
-    faces[i][1][0] = ii;
-    faces[i][1][1] = ii + 2;
-    faces[i][1][2] = ii + 3;
+      const unsigned short ii = i * 2;
+      faces[i][0][0] = ii;
+      faces[i][0][1] = (ii + 3) % (face_count * 2);
+      faces[i][0][2] = ii + 1;
+      faces[i][1][0] = ii;
+      faces[i][1][1] = (ii + 2) % (face_count * 2);
+      faces[i][1][2] = (ii + 3) % (face_count * 2);
+//      o << faces[i][0][0] << " ";
+//      o << faces[i][0][1] << " ";
+//      o << faces[i][0][2] << std::endl;
+//      o << faces[i][1][0] << " ";
+//      o << faces[i][1][1] << " ";
+//      o << faces[i][1][2] << std::endl;
+    }
 
-    o << faces[i][0][0] << " ";
-    o << faces[i][0][1] << " ";
-    o << faces[i][0][2] << std::endl;
-    o << faces[i][1][0] << " ";
-    o << faces[i][1][1] << " ";
-    o << faces[i][1][2] << std::endl;
+    Ogre::VertexData* wd = new Ogre::VertexData();
+    wd->vertexCount = face_count * 2;
+
+    /// Create declaration (memory format) of vertex data
+    Ogre::VertexDeclaration* decl = wd->vertexDeclaration;
+    size_t offset = 0;
+    // 1st buffer
+    decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+    decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+    /// Allocate vertex buffer of the requested number of vertices (vertexCount) 
+    /// and bytes per vertex (offset)
+    Ogre::HardwareVertexBufferSharedPtr vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+      offset, wd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    /// Upload the vertex data to the card
+    vbuf->writeData(0, vbuf->getSizeInBytes(), vertices, true);
+    wd->vertexBufferBinding->setBinding(0, vbuf);
+
+    // 2ed buffer
+    offset = 0;
+    decl->addElement(1, offset, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
+    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR);
+    /// Allocate vertex buffer of the requested number of vertices (vertexCount) 
+    /// and bytes per vertex (offset)
+    vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+      offset, wd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    /// Upload the vertex data to the card
+    vbuf->writeData(0, vbuf->getSizeInBytes(), colours, true);
+    /// Set vertex buffer binding so buffer 1 is bound to our colour buffer
+    wd->vertexBufferBinding->setBinding(1, vbuf);
+
+    /// Allocate index buffer of the requested number of vertices (ibufCount) 
+    Ogre::HardwareIndexBufferSharedPtr ibuf = Ogre::HardwareBufferManager::getSingleton().
+          createIndexBuffer(Ogre::HardwareIndexBuffer::IT_16BIT, face_count * 2 * 3, 
+          Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    /// Upload the index data to the card
+    ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
+
+    /// Create the mesh via the MeshManager
+    Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("SpotWheel", "General");
+    msh->sharedVertexData = wd;
+    /// Create one submesh
+    Ogre::SubMesh* sub = msh->createSubMesh();
+
+    /// Set parameters of the submesh
+    sub->useSharedVertices = true;
+    sub->indexData->indexBuffer = ibuf;
+    sub->indexData->indexCount = face_count * 2 * 3;
+    sub->indexData->indexStart = 0;
+
+    /// Set bounding information (for culling)
+    msh->_setBounds(Ogre::AxisAlignedBox(0, -radius, -radius, wheel_width, radius, radius));
+    msh->_setBoundingSphereRadius(Ogre::Math::Sqrt(radius * radius + wheel_width / 2));
+
+    /// Notify -Mesh object that it has been loaded
+    msh->load();
+
+    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
+      "Test/ColourTest1", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+      material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
+
+  #if 0
+    Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("SpotWheel", "General");
+
+
+    /// Set vertex buffer binding so buffer 0 is bound to our vertex buffer
+    Ogre::VertexBufferBinding* bind = msh->sharedVertexData->vertexBufferBinding; 
+    bind->setBinding(0, vbuf);
+  #endif
   }
 
-  Ogre::VertexData* wd = new Ogre::VertexData();
-  wd->vertexCount = face_count * 2;
-
-  /// Create declaration (memory format) of vertex data
-  Ogre::VertexDeclaration* decl = wd->vertexDeclaration;
-  size_t offset = 0;
-  // 1st buffer
-  decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-  offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-  decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
-  offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-  /// Allocate vertex buffer of the requested number of vertices (vertexCount) 
-  /// and bytes per vertex (offset)
-  Ogre::HardwareVertexBufferSharedPtr vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
-    offset, wd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-  /// Upload the vertex data to the card
-  vbuf->writeData(0, vbuf->getSizeInBytes(), vertices, true);
-  wd->vertexBufferBinding->setBinding(0, vbuf);
-
-  // 2ed buffer
-  offset = 0;
-  decl->addElement(1, offset, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
-  offset += Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR);
-  /// Allocate vertex buffer of the requested number of vertices (vertexCount) 
-  /// and bytes per vertex (offset)
-  vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
-    offset, wd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-  /// Upload the vertex data to the card
-  vbuf->writeData(0, vbuf->getSizeInBytes(), colours, true);
-  /// Set vertex buffer binding so buffer 1 is bound to our colour buffer
-  wd->vertexBufferBinding->setBinding(1, vbuf);
-
-  /// Allocate index buffer of the requested number of vertices (ibufCount) 
-  Ogre::HardwareIndexBufferSharedPtr ibuf = Ogre::HardwareBufferManager::getSingleton().
-        createIndexBuffer(Ogre::HardwareIndexBuffer::IT_16BIT, face_count * 2 * 3, 
-        Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-  /// Upload the index data to the card
-  ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
-
-  /// Create the mesh via the MeshManager
-  Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("SpotWheel", "General");
-  msh->sharedVertexData = wd;
-  /// Create one submesh
-  Ogre::SubMesh* sub = msh->createSubMesh();
-
-  /// Set parameters of the submesh
-  sub->useSharedVertices = true;
-  sub->indexData->indexBuffer = ibuf;
-  sub->indexData->indexCount = face_count * 2 * 3;
-  sub->indexData->indexStart = 0;
-
-  /// Set bounding information (for culling)
-  msh->_setBounds(Ogre::AxisAlignedBox(0, -radius, -radius, wheel_width, radius, radius));
- // msh->_setBoundingSphereRadius(Ogre::Math::Sqrt(3*100*100));
-
-  /// Notify -Mesh object that it has been loaded
-  msh->load();
-
-  Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
-    "Test/ColourTest1", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
-
-#if 0
-  Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("SpotWheel", "General");
-
-
-  /// Set vertex buffer binding so buffer 0 is bound to our vertex buffer
-  Ogre::VertexBufferBinding* bind = msh->sharedVertexData->vertexBufferBinding; 
-  bind->setBinding(0, vbuf);
-#endif
-
-
-  
-}
-
-void createColourCube()
-{
+  void createColourCube()
+  {
     /// Create the mesh via the MeshManager
     Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("ColourCube", "General");
 
@@ -266,134 +262,71 @@ void createColourCube()
     Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
       "Test/ColourTest", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
       material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
-}
+  }
 
+} /* namespace */
 
-class base_application : public OgreBites::SampleContext/*public OgreBites::ApplicationContext
-    , public OgreBites::InputListener
-    , public Ogre::FrameListener*/ {
+class tutorial3 : public Application {
 public:
-  base_application();
-  void setup();
-  bool keyPressed(const OgreBites::KeyboardEvent& evt);
-  bool frameStarted(const Ogre::FrameEvent& evt);
-  bool frameEnded(const Ogre::FrameEvent& evt);
+  tutorial3();
+  void createScene() override;
 private:
   Ogre::SceneNode* node = 0;
 };
 
-base_application::base_application() : OgreBites::SampleContext("OgreTutorialApp")
-{
+tutorial3::tutorial3() : Application("plugins.cfg", "resources-1.9.cfg") {
+
 }
 
-bool base_application::keyPressed(const OgreBites::KeyboardEvent& evt)
+void tutorial3::createScene()
 {
-    if (evt.keysym.sym == OgreBites::SDLK_ESCAPE)
-    {
-        getRoot()->queueEndRendering();
-    }
-    return true;
-}
+  Ogre::SceneManager* sceneManager = create_scene_manager();
+  sceneManager->setAmbientLight( Ogre::ColourValue( 0.5, 0.5, 0.5 ) );
 
-void base_application::setup(void)
-{
-  Ogre::ConfigFile cf;
-  cf.load("/home/aleksei/project/extrajob/ogre_tutorial/resources.cfg");
-  Ogre::String sec, type, arch;
-  // go through all specified resource groups
-  Ogre::ConfigFile::SettingsBySection_::const_iterator seci;
-  for(seci = cf.getSettingsBySection().begin(); seci != cf.getSettingsBySection().end(); ++seci) {
-      sec = seci->first;
-      const Ogre::ConfigFile::SettingsMultiMap& settings = seci->second;
-      Ogre::ConfigFile::SettingsMultiMap::const_iterator i;
+  Ogre::Camera* camera = sceneManager->createCamera("PlayerCam");
+  camera->setPosition(0, 0, 300);
+  camera->lookAt(Ogre::Vector3(0, 0, 0)/*, Ogre::Node::TransformSpace::TS_WORLD*/);
+  camera->setNearClipDistance( 5 );
 
-      // go through all resource paths
-      for (i = settings.begin(); i != settings.end(); i++)
-      {
-          type = i->first;
-          arch = Ogre::FileSystemLayer::resolveBundlePath(i->second);
+  Ogre::Viewport* viewPort = get_render_window()->addViewport( camera );
+  viewPort->setBackgroundColour( Ogre::ColourValue( 0, 0, 0 ) );
+  camera->setAspectRatio( Ogre::Real( viewPort->getActualWidth() ) / Ogre::Real( viewPort->getActualHeight() ) );
 
-          Ogre::ResourceGroupManager::getSingleton().addResourceLocation(arch, type, sec);
-      }
-  }
-  // do not forget to call the base first
-  OgreBites::ApplicationContext::setup();
-  
-  // register for input events
-  addInputListener(this);
+  // Create a Light and set its position
+  Ogre::Light* light = sceneManager->createLight("MainLight");
+  light->setPosition(0.0f, 0.0f, 120.0f);
 
-  // get a pointer to the already created root
-  Ogre::Root* root = getRoot();
-  root->addFrameListener(this);
-  Ogre::SceneManager* scnMgr = root->createSceneManager();
 
-  // register our scene with the RTSS
-  Ogre::RTShader::ShaderGenerator* shadergen = Ogre::RTShader::ShaderGenerator::getSingletonPtr();
-  shadergen->addSceneManager(scnMgr);
-
-  // without light we would just get a black screen    
-  Ogre::Light* light = scnMgr->createLight("MainLight");
-  Ogre::SceneNode* lightNode = scnMgr->getRootSceneNode()->createChildSceneNode();
-  lightNode->setPosition(0, 100, 150);
-  lightNode->attachObject(light);
-
-  // also need to tell where we are
-  Ogre::SceneNode* camNode = scnMgr->getRootSceneNode()->createChildSceneNode();
-  camNode->setPosition(0, 0, 100);
-  camNode->lookAt(Ogre::Vector3(0, 0, -1), Ogre::Node::TS_PARENT);
-
-  // create the camera
-  Ogre::Camera* cam = scnMgr->createCamera("myCam");
-  cam->setNearClipDistance(5); // specific to this sample
-  cam->setAutoAspectRatio(true);
-  camNode->attachObject(cam);
-  camNode->setPosition(0, 0, 300);
-
-  // and tell it to render into the main window
-  getRenderWindow()->addViewport(cam);
-
-#if 0
-  // finally something to render
-  Ogre::Entity* ent = scnMgr->createEntity("ogrehead.mesh");
-  node = scnMgr->getRootSceneNode()->createChildSceneNode();
-  node->setPosition(0,0,0);
-  //node->roll(Ogre::Degree(-60));
-  node->attachObject(ent);
-#else
   createColourCube();
-  slot_mashina();
-  Ogre::Entity* thisEntity = scnMgr->createEntity("cc", "SpotWheel");
+  slot_machine();
+  Ogre::Entity* thisEntity = sceneManager->createEntity("cc", "SpotWheel");
   thisEntity->setMaterialName("Test/ColourTest");
-  Ogre::SceneNode* thisSceneNode = scnMgr->getRootSceneNode()->createChildSceneNode();
-  thisSceneNode->setPosition(0, 0, -600);
+  Ogre::SceneNode* thisSceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
+  thisSceneNode->setPosition(0, 0, -300);
+//  thisSceneNode->yaw(Ogre::Radian(1.0));
+  thisSceneNode->pitch(Ogre::Radian(1.0));
+  thisSceneNode->attachObject(thisEntity);
+#if 0
+  createColourCube();
+  Ogre::Entity* thisEntity = sceneManager->createEntity("cc", "ColourCube");
+  thisEntity->setMaterialName("Test/ColourTest");
+  Ogre::SceneNode* thisSceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
+  thisSceneNode->setPosition(0, 0, -300);
   thisSceneNode->attachObject(thisEntity);
   thisSceneNode->yaw(Ogre::Radian(1.0));
   thisSceneNode->pitch(Ogre::Radian(1.0));
 #endif
-
 }
-#if 1
-bool base_application::frameStarted(const Ogre::FrameEvent& evt) {
-  return true;  
-}
-
-bool base_application::frameEnded(const Ogre::FrameEvent& evt) {
-  return true;  
-}
-#endif
 
 int main(int ac, char* av[]) {
   try {
-    base_application app;
-    app.initApp();
-    app.getRoot()->startRendering();
-    app.closeApp();
+    tutorial3 app;
+    app.startApplication();
     return 0;
   }
   catch(const std::exception& e) {
     std::cout << "error: " << e.what() << std::endl;
   }
-
   return 1;
 }
 
