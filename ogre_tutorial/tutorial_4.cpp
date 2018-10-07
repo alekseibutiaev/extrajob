@@ -69,9 +69,9 @@ namespace {
   inline Ogre::Vector3 create_normal(const Ogre::Vector3& a, const Ogre::Vector3& b,
       const Ogre::Vector3& c) {
     Ogre::Vector3 res = (c - a).crossProduct(b - a);
-//    Ogre::Vector3 res = (b - a).crossProduct(c - a);
     res.normalise();
     return res;
+    
   }
 
   template<std::size_t face_count>
@@ -89,8 +89,6 @@ namespace {
 
   template<std::size_t face_count, typename face_index_t = unsigned short>
   void slot_machine_wheel(const double radius, const double width) {
-    // is_integral
-    //static_assert( std::is_same<face_index_t, unsigned short>::value || std::is_same<face_index_t, unsigned int>::value, "face_index_t must by unsigned short or unsigned int");
     static_assert(std::is_integral<face_index_t>::value && (sizeof(face_index_t) == sizeof(short) ||
       sizeof(face_index_t) == sizeof(int)), "face_index_t must by integer and 16 or 32 bit");
 
