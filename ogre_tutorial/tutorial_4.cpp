@@ -31,10 +31,10 @@ namespace {
       material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
   }
 
-  void create_mash(const Ogre::String& name, const Ogre::String& groupm, Ogre::VertexData* vd, std::size_t count,
+  void create_mash(const Ogre::String& name, const Ogre::String& group, Ogre::VertexData* vd, std::size_t count,
       Ogre::HardwareIndexBufferSharedPtr ibuf, const Ogre::AxisAlignedBox& box, const double radius) {
       /// Create the mesh via the MeshManager
-    Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("SpotWheel", "General");
+    Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual(name, group);
     msh->sharedVertexData = vd;
     /// Create one submesh
     Ogre::SubMesh* sub = msh->createSubMesh();
