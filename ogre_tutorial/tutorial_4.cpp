@@ -26,7 +26,7 @@ namespace {
 
   void sample_material() {
     Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
-      "Test/ColourTest1", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+      "Test/ColourTest", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
       material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
   }
 
@@ -34,8 +34,8 @@ namespace {
     const static std::size_t face_count = 36;
     const static double step = 2 * M_PI / face_count;
     const static double wheel_xpos = 0;
-    const static double wheel_width = 20.0;
-    const static double radius = 50;
+    const static double wheel_width = 70.0;
+    const static double radius = 200;
 
     Ogre::Vector3 vertices[face_count][2][2];
     unsigned short faces[face_count][2][3];
@@ -122,9 +122,6 @@ namespace {
     /// Notify -Mesh object that it has been loaded
     msh->load();
 
-    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
-      "Test/ColourTest1", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-      material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
   }
 
   void createColourCube()
@@ -268,16 +265,17 @@ private:
 };
 
 tutorial4::tutorial4() : Application("plugins.cfg", "resources-1.9.cfg") {
+  const std::string s = OGRE_HOME;
   start_input();
   key_listener_ptr kl = key_listener_ptr(new key_listener_ptr::element_type());
   kl->m_pressed = [&](const OIS::KeyEvent& value){return key_pressed(value);};
   kl->m_released = [&](const OIS::KeyEvent& value){return key_released(value);};
-  set_key_listner(std::move(kl));
+  set_key_listener(std::move(kl));
   mouse_listener_ptr ml = mouse_listener_ptr(new mouse_listener_ptr::element_type());
   ml->m_move = [&](const OIS::MouseEvent& value){return mouse_moved(value);};
   ml->m_pressed = [&](const OIS::MouseEvent& value, OIS::MouseButtonID id){return mouse_pressed(value, id);};
   ml->m_released = [&](const OIS::MouseEvent& value, OIS::MouseButtonID id){return mouse_released(value, id);};
-  set_mouse_listner(std::move(ml));
+  set_mouse_listener(std::move(ml));
 }
 
 void tutorial4::createScene()
@@ -329,6 +327,7 @@ bool tutorial4::mouse_pressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id 
 }
 
 bool tutorial4::mouse_released( const OIS::MouseEvent &arg, OIS::MouseButtonID id ) {
+  //set_mouse_listener(mouse_listener_ptr());
   return true;
 }
 
@@ -337,6 +336,7 @@ bool tutorial4::key_pressed(const OIS::KeyEvent &arg) {
 }
 
 bool tutorial4::key_released(const OIS::KeyEvent &arg) {
+  //set_key_listener(key_listener_ptr());
   return true;
 }
 

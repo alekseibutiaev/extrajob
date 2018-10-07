@@ -36,27 +36,6 @@ const OIS::ParamList Application::oisdefault = {
   {"w32_keyboard", "DISCL_NONEXCLUSIVE"},
 };
 
-bool Application::mouse_listener::mouseMoved(const OIS::MouseEvent& value) {
-  return static_cast<bool>(m_move) ? m_move(value) : true;
-}
-
-bool Application::mouse_listener::mousePressed(const OIS::MouseEvent& value, OIS::MouseButtonID id) {
-  return static_cast<bool>(m_pressed) ? m_pressed(value, id) : true;
-}
-
-bool Application::mouse_listener::mouseReleased(const OIS::MouseEvent& value, OIS::MouseButtonID id) {
-  return static_cast<bool>(m_released) ? m_released(value, id) : true;
-}
-
-bool Application::key_listener::keyPressed(const OIS::KeyEvent& value) {
-  return static_cast<bool>(m_pressed) ? m_pressed(value) : true;
-}
-
-bool Application::key_listener::keyReleased(const OIS::KeyEvent& value) {
-  return static_cast<bool>(m_released) ? m_released(value) : true;
-}
-
-
 Application::Application(const Ogre::String& plugin_config,
       const Ogre::String& resource_config)
     : m_plugin_config(plugin_config)
@@ -78,6 +57,7 @@ void Application::startApplication()
   parseResourceFileConfiguration();
   initializeResources();
   createScene();
+  m_root->addFrameListener(this);
   m_root->startRendering();
 }
 
@@ -125,21 +105,18 @@ void Application::initializeResources()
     Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 }
 
-void Application::start_input(const OIS::ParamList& value) {
+void Application::start_input(OIS::ParamList value) {
   static const char* name_win = "WINDOW";
-  OIS::ParamList paramlist = value;
   std::size_t handle;
-  Ogre::RenderWindow* win = get_render_window();
-  win->getCustomAttribute(name_win, &handle);
-  paramlist.insert({name_win, std::to_string(handle)});
-  m_input_manager = std::move(input_manager_ptr(OIS::InputManager::createInputSystem(paramlist),
+  get_render_window()->getCustomAttribute(name_win, &handle);
+  value.insert({name_win, std::to_string(handle)});
+  m_input_manager = std::move(input_manager_ptr(OIS::InputManager::createInputSystem(value),
     &OIS::InputManager::destroyInputSystem));
-  windowResized(win);
 }
 
 void Application::stop_input() {
-  set_key_listner(key_listener_ptr());
-  set_mouse_listner(mouse_listener_ptr());
+  set_key_listener(key_listener_ptr());
+  set_mouse_listener(mouse_listener_ptr());
   m_input_manager.reset();
 }
 
@@ -258,72 +235,94 @@ Ogre::RenderWindow* Application::get_render_window() {
   return m_renderWindow;
 }
 
-void Application::set_key_listner(key_listener_ptr&& value) {
+void Application::set_frame_listener(frame_listener_ptr&& value) {
+  m_frame_listener = std::move(value);
+}
+
+void Application::set_key_listener(key_listener_ptr&& value) {
   assert(static_cast<bool>(m_input_manager));
   m_key_listner = std::move(value);  
   if(static_cast<bool>(m_key_listner)) {
-    if(0 != (m_input_context.mKeyboard = static_cast<OIS::Keyboard*>(m_input_manager->createInputObject(OIS::OISKeyboard, true)))){
+    if(0 != (m_input_context.mKeyboard = static_cast<OIS::Keyboard*>(m_input_manager->createInputObject(OIS::OISKeyboard, true))))
       m_input_context.mKeyboard->setEventCallback(this);
-      m_input_context.mKeyboard->capture();
-    }
   }
   else if(0 != m_input_context.mKeyboard) {
     m_input_context.mKeyboard->setEventCallback(0);  
     m_input_manager->destroyInputObject(m_input_context.mKeyboard);
+    m_input_context.mKeyboard = 0;
   }
 }
 
-void Application::set_mouse_listner(mouse_listener_ptr&& value){
+void Application::set_mouse_listener(mouse_listener_ptr&& value){
   assert(static_cast<bool>(m_input_manager));
   m_mouse_listner = std::move(value);
   if(static_cast<bool>(m_mouse_listner)) {
     if(0 != (m_input_context.mMouse = static_cast<OIS::Mouse*>(m_input_manager->createInputObject(OIS::OISMouse, true)))) {
+      windowResized();
       m_input_context.mMouse->setEventCallback(this);
-      m_input_context.mMouse->capture();
     }
   }
   else if(m_input_context.mMouse) {
     m_input_context.mMouse->setEventCallback(0);
     m_input_manager->destroyInputObject(m_input_context.mMouse);
+    m_input_context.mMouse = 0;
   }
 }
+
+ // Ogre::FrameListener
+bool Application::frameStarted(const Ogre::FrameEvent& value) {
+  m_input_context.capture();
+  return static_cast<bool>(m_frame_listener) && static_cast<bool>(m_frame_listener->m_started) ?
+    m_frame_listener->m_started(value) : true;
+}
+
+bool Application::frameRenderingQueued(const Ogre::FrameEvent& value) {
+  return static_cast<bool>(m_frame_listener) && static_cast<bool>(m_frame_listener->m_rendering_queued) ?
+    m_frame_listener->m_rendering_queued(value) : true;
+}
+
+bool Application::frameEnded(const Ogre::FrameEvent& value) {
+  return static_cast<bool>(m_frame_listener) && static_cast<bool>(m_frame_listener->m_ended) ?
+    m_frame_listener->m_ended(value) : true;
+}
+ 
 // OIS::MouseListener  
 bool Application::mouseMoved(const OIS::MouseEvent& value) {
-  if(m_mouse_listner)
-    return m_mouse_listner->mouseMoved(value);
+  if(m_mouse_listner && m_mouse_listner->m_move)
+    return m_mouse_listner->m_move(value);
   return true;
 }
 
 bool Application::mousePressed(const OIS::MouseEvent& value, OIS::MouseButtonID id) {
-  if(m_mouse_listner)
-    return m_mouse_listner->mousePressed(value, id);
+  if(m_mouse_listner && m_mouse_listner->m_pressed)
+    return m_mouse_listner->m_pressed(value, id);
   return true;
 }
 
 bool Application::mouseReleased(const OIS::MouseEvent& value, OIS::MouseButtonID id ) {
-  if(m_mouse_listner)
-    return m_mouse_listner->mouseReleased(value, id);
+  if(m_mouse_listner && m_mouse_listner->m_released)
+    return m_mouse_listner->m_released(value, id);
   return true;
 }
 // OIS::MouseListener  
 bool Application::keyPressed(const OIS::KeyEvent& value) {
-  if(m_key_listner)
-    return m_key_listner->keyPressed(value);
+  if(m_key_listner && m_key_listner->m_pressed)
+    return m_key_listner->m_pressed(value);
   return true;
 }
 
 bool Application::keyReleased(const OIS::KeyEvent& value) {
-  if(m_key_listner)
-    return m_key_listner->keyReleased(value);
+  if(m_key_listner && m_key_listner->m_released)
+    return m_key_listner->m_released(value);
   return true;
 }
 
-void Application::windowResized(Ogre::RenderWindow* value) {
+void Application::windowResized() {
   if(m_input_context.mMouse) {
     const OIS::MouseState& ms = m_input_context.mMouse->getMouseState();
+    Ogre::RenderWindow* value = get_render_window();
     ms.width = value->getWidth();
     ms.height = value->getHeight();
   }
-
 }
 
