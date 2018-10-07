@@ -2,6 +2,7 @@
   "editor.tabSize": 2,
   "editor.folding": true,
   "files.associations": {
-    "*.tcc": "cpp"
+    "*.tcc": "cpp",
+    "functional": "cpp"
   },
 }

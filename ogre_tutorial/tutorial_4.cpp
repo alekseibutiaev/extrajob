@@ -4,6 +4,7 @@
 #include <iostream>
 #include <exception>
 #include <type_traits>
+#include <chrono>
 
 #include <Ogre.h>
 #include <OgreRoot.h>
@@ -67,7 +68,8 @@ namespace {
 
   inline Ogre::Vector3 create_normal(const Ogre::Vector3& a, const Ogre::Vector3& b,
       const Ogre::Vector3& c) {
-    Ogre::Vector3 res = (b - a).crossProduct(c - a);
+    Ogre::Vector3 res = (c - a).crossProduct(b - a);
+//    Ogre::Vector3 res = (b - a).crossProduct(c - a);
     res.normalise();
     return res;
   }
@@ -302,6 +304,15 @@ private:
 	bool mouse_released(const OIS::MouseEvent& value, OIS::MouseButtonID id);
   bool key_pressed(const OIS::KeyEvent& value);
 	bool key_released(const OIS::KeyEvent& value);
+  bool frame_startted(const Ogre::FrameEvent& value);
+private:
+  Ogre::Camera* camera = 0;
+  Ogre::SceneNode* sw = 0;
+  Ogre::Vector3 rotate;
+  std::chrono::system_clock::time_point m_previous;
+  int x = 0;
+  int y = 0;
+  int z = 0;
 };
 
 tutorial4::tutorial4() : Application("plugins.cfg", "resources-1.9.cfg") {
@@ -316,67 +327,143 @@ tutorial4::tutorial4() : Application("plugins.cfg", "resources-1.9.cfg") {
   ml->m_pressed = [&](const OIS::MouseEvent& value, OIS::MouseButtonID id){return mouse_pressed(value, id);};
   ml->m_released = [&](const OIS::MouseEvent& value, OIS::MouseButtonID id){return mouse_released(value, id);};
   set_mouse_listener(std::move(ml));
+  frame_listener_ptr fl = frame_listener_ptr(new frame_listener_ptr::element_type());
+  fl->m_started = [&](const Ogre::FrameEvent& value){return frame_startted(value);};
+  set_frame_listener(std::move(fl));
 }
 
 void tutorial4::createScene()
 {
   Ogre::SceneManager* sceneManager = create_scene_manager();
-  sceneManager->setAmbientLight( Ogre::ColourValue( 0.5, 0.5, 0.5 ) );
+  sceneManager->setAmbientLight(Ogre::ColourValue(1.0, 1.0, 1.0));
 
-  Ogre::Camera* camera = sceneManager->createCamera("PlayerCam");
+  camera = sceneManager->createCamera("PlayerCam");
   camera->setPosition(0, 0, 300);
-  camera->lookAt(Ogre::Vector3(0, 0, 0)/*, Ogre::Node::TransformSpace::TS_WORLD*/);
-  camera->setNearClipDistance( 5 );
+  camera->lookAt(Ogre::Vector3(0, 1, 0)/*, Ogre::Node::TransformSpace::TS_WORLD*/);
 
+  camera->setNearClipDistance( 5 );
+  
   Ogre::Viewport* viewPort = get_render_window()->addViewport( camera );
-  viewPort->setBackgroundColour( Ogre::ColourValue( 0, 0, 0 ) );
-  camera->setAspectRatio( Ogre::Real( viewPort->getActualWidth() ) / Ogre::Real( viewPort->getActualHeight() ) );
+  viewPort->setBackgroundColour(Ogre::ColourValue(0.1, 0.1, 0.1));
+  camera->setAspectRatio(Ogre::Real(viewPort->getActualWidth())/Ogre::Real(viewPort->getActualHeight()));
 
   // Create a Light and set its position
   Ogre::Light* light = sceneManager->createLight("MainLight");
-  light->setPosition(0.0f, 0.0f, 120.0f);
+  light->setPosition(0.0f, 0.0f, 0.120f);
 
   sample_material();
   createColourCube();
   slot_machine_wheel<36>(200.0, 70.0);
-  Ogre::Entity* thisEntity = sceneManager->createEntity("cc", "SpotWheel");
+  Ogre::Entity* thisEntity = sceneManager->createEntity("sw", "SpotWheel");
   thisEntity->setMaterialName("Test/ColourTest");
-  Ogre::SceneNode* thisSceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
-  thisSceneNode->setPosition(0, 0, -300);
-  //  thisSceneNode->yaw(Ogre::Radian(1.0));
-  thisSceneNode->pitch(Ogre::Radian(1.0));
-  thisSceneNode->attachObject(thisEntity);
+  Ogre::SceneNode* node = sceneManager->getRootSceneNode()->createChildSceneNode();
+  node->setPosition(0, 0, 0);
+  //  node->yaw(Ogre::Radian(1.0));
+  //node->pitch(Ogre::Radian(1.0));
+  node->attachObject(thisEntity);
+  sw = node;
+
+  /*Ogre::Entity**/ thisEntity = sceneManager->createEntity("sw1", "SpotWheel");
+  thisEntity->setMaterialName("Test/ColourTest");
+  node = sceneManager->getRootSceneNode()->createChildSceneNode();
+  node->setPosition(-70, 0, 0);
+  //  node->yaw(Ogre::Radian(1.0));
+  //node->pitch(Ogre::Radian(1.0));
+  node->attachObject(thisEntity);
 #if 0
   createColourCube();
-  Ogre::Entity* thisEntity = sceneManager->createEntity("cc", "ColourCube");
+  /*Ogre::Entity**/ thisEntity = sceneManager->createEntity("cc", "ColourCube");
   thisEntity->setMaterialName("Test/ColourTest");
-  Ogre::SceneNode* thisSceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
-  thisSceneNode->setPosition(0, 0, -300);
-  thisSceneNode->attachObject(thisEntity);
-  thisSceneNode->yaw(Ogre::Radian(1.0));
-  thisSceneNode->pitch(Ogre::Radian(1.0));
+  /*Ogre::SceneNode* */node = sceneManager->getRootSceneNode()->createChildSceneNode();
+  node->setPosition(0, 0, -300);
+  node->attachObject(thisEntity);
+  node->yaw(Ogre::Radian(1.0));
+  node->pitch(Ogre::Radian(1.0));
 #endif
 }
 
-bool tutorial4::mouse_moved(const OIS::MouseEvent &arg ) {
+bool tutorial4::mouse_moved(const OIS::MouseEvent& value) {
   return true;
 }
 
-bool tutorial4::mouse_pressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id ) {
+bool tutorial4::mouse_pressed(const OIS::MouseEvent& value, OIS::MouseButtonID id ) {
   return true;
 }
 
-bool tutorial4::mouse_released( const OIS::MouseEvent &arg, OIS::MouseButtonID id ) {
+bool tutorial4::mouse_released( const OIS::MouseEvent& value, OIS::MouseButtonID id ) {
   //set_mouse_listener(mouse_listener_ptr());
   return true;
 }
 
-bool tutorial4::key_pressed(const OIS::KeyEvent &arg) {
+bool tutorial4::key_pressed(const OIS::KeyEvent& value) {
+  const float step = 10.0;
+  const int s = 5;
+  switch(value.key) {
+    case OIS::KeyCode::KC_W :
+      camera->move(Ogre::Vector3(0.0, 0.0, step));
+      break;
+    case OIS::KeyCode::KC_S :
+      camera->move(Ogre::Vector3(0.0, 0.0, -step));
+      break;
+    case OIS::KeyCode::KC_A :
+      camera->move(Ogre::Vector3(-step, 0.0, 0.0));
+      break;
+    case OIS::KeyCode::KC_D :
+      camera->move(Ogre::Vector3(step, 0.0, 0.0));
+      break;
+    case OIS::KeyCode::KC_Q :
+      camera->move(Ogre::Vector3(0.0, -step, 0.0));
+      break;
+    case OIS::KeyCode::KC_E :
+      camera->move(Ogre::Vector3(0.0, step, 0.0));
+      break;
+    case OIS::KeyCode::KC_P :
+      if(0 >= x)
+        x += s;
+      break;
+    case OIS::KeyCode::KC_O :
+      if(0 <= x)
+        x -= s;
+      break;
+    case OIS::KeyCode::KC_I :
+      if(0 >= y)
+        y += s;
+      break;
+    case OIS::KeyCode::KC_U :
+      if(0 <= y)
+        y -= s;
+      break;
+    case OIS::KeyCode::KC_L :
+      if(0 >= z)
+        z += s;
+      break;
+    case OIS::KeyCode::KC_K :
+      if(0 <= z)
+        z -= s;
+      break;
+    default:
+      break;
+  };
   return true;
 }
 
-bool tutorial4::key_released(const OIS::KeyEvent &arg) {
+bool tutorial4::key_released(const OIS::KeyEvent& value) {
   //set_key_listener(key_listener_ptr());
+  return true;
+}
+
+bool tutorial4::frame_startted(const Ogre::FrameEvent& value) {
+  std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+  std::chrono::system_clock::duration d = now - m_previous;
+  auto c = d.count();
+  if(c > 100000000){
+    if( (true || 0 != z || 0 != y || 0 != x) ) {
+      sw->roll(Ogre::Degree(z));
+      sw->pitch(Ogre::Degree(x));
+      sw->yaw(Ogre::Degree(y));
+    }
+    m_previous = now;
+  }
   return true;
 }
 
