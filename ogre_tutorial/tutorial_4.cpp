@@ -162,7 +162,7 @@ namespace {
 
     create_mash("SpotWheel", "General", vd, face_count * 2 * 3, ibuf,
       Ogre::AxisAlignedBox(0, -radius, -radius, width, radius, radius),
-      Ogre::Math::Sqrt(radius * radius + width / 2));
+      Ogre::Math::Sqrt(radius * radius + (width/2) * (width/2)));
 
   }
 
@@ -346,6 +346,7 @@ void tutorial4::createScene()
   Ogre::Viewport* viewPort = get_render_window()->addViewport( camera );
   viewPort->setBackgroundColour(Ogre::ColourValue(0.1, 0.1, 0.1));
   camera->setAspectRatio(Ogre::Real(viewPort->getActualWidth())/Ogre::Real(viewPort->getActualHeight()));
+  camera->setProjectionType(Ogre::ProjectionType::PT_ORTHOGRAPHIC);
 
   // Create a Light and set its position
   Ogre::Light* light = sceneManager->createLight("MainLight");
@@ -353,7 +354,7 @@ void tutorial4::createScene()
 
   sample_material();
   createColourCube();
-  slot_machine_wheel<36>(200.0, 70.0);
+  slot_machine_wheel<36>(200.0, 125.6);
   Ogre::Entity* thisEntity = sceneManager->createEntity("sw", "SpotWheel");
   thisEntity->setMaterialName("Test/ColourTest");
   Ogre::SceneNode* node = sceneManager->getRootSceneNode()->createChildSceneNode();
@@ -366,7 +367,7 @@ void tutorial4::createScene()
   /*Ogre::Entity**/ thisEntity = sceneManager->createEntity("sw1", "SpotWheel");
   thisEntity->setMaterialName("Test/ColourTest");
   node = sceneManager->getRootSceneNode()->createChildSceneNode();
-  node->setPosition(-70, 0, 0);
+  node->setPosition(-125.6, 0, 0);
   //  node->yaw(Ogre::Radian(1.0));
   //node->pitch(Ogre::Radian(1.0));
   node->attachObject(thisEntity);
