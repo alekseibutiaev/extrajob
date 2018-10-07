@@ -149,7 +149,7 @@ void Application::parseResourceFileConfiguration()
     }
 
     const Ogre::ResourceGroupManager::LocationList genLocs = Ogre::ResourceGroupManager::getSingleton().getResourceLocationList("General");
-    absolutePathToTheResource = "/opt/ogre-1.9/share/OGRE/Media";
+    absolutePathToTheResource = OGRE_HOME "/share/OGRE/Media";//"/opt/ogre-1.9/share/OGRE/Media";
     typeNameOfTheResource = "FileSystem";
     sectionNameOfTheResource = "Popular";
 

@@ -3,6 +3,7 @@
 #include <memory>
 #include <iostream>
 #include <exception>
+#include <type_traits>
 
 #include <Ogre.h>
 #include <OgreRoot.h>
@@ -30,45 +31,100 @@ namespace {
       material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
   }
 
-  void slot_machine() {
-    const static std::size_t face_count = 36;
-    const static double step = 2 * M_PI / face_count;
-    const static double wheel_xpos = 0;
-    const static double wheel_width = 70.0;
-    const static double radius = 200;
+  void create_mash(const Ogre::String& name, const Ogre::String& groupm, Ogre::VertexData* vd, std::size_t count,
+      Ogre::HardwareIndexBufferSharedPtr ibuf, const Ogre::AxisAlignedBox& box, const double radius) {
+      /// Create the mesh via the MeshManager
+    Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("SpotWheel", "General");
+    msh->sharedVertexData = vd;
+    /// Create one submesh
+    Ogre::SubMesh* sub = msh->createSubMesh();
+
+    /// Set parameters of the submesh
+    sub->useSharedVertices = true;
+    sub->indexData->indexBuffer = ibuf;
+    sub->indexData->indexCount = count;
+    sub->indexData->indexStart = 0;
+
+    /// Set bounding information (for culling)
+    msh->_setBounds(box);
+    msh->_setBoundingSphereRadius(radius);
+
+    /// Notify -Mesh object that it has been loaded
+    msh->load();
+  }
+
+  template<typename T, std::size_t N>
+  void slot_machine_faces(T(&faces)[N][2][3], const std::size_t index) {
+    static const std::size_t dev = N * 2;
+    const T i = index * 2;
+    faces[index][0][0] = i;
+    faces[index][0][1] = (i + 3) % dev;
+    faces[index][0][2] = i + 1;
+    faces[index][1][0] = i;
+    faces[index][1][1] = (i + 2) % dev;
+    faces[index][1][2] = (i + 3) % dev;
+  }
+
+  inline Ogre::Vector3 create_normal(const Ogre::Vector3& a, const Ogre::Vector3& b,
+      const Ogre::Vector3& c) {
+    Ogre::Vector3 res = (b - a).crossProduct(c - a);
+    res.normalise();
+    return res;
+  }
+
+  template<std::size_t face_count>
+  void apply_normal(Ogre::Vector3(&vertices)[face_count][2][2], std::size_t i) {
+    if(0 != i) {
+      const std::size_t pi = i - 1;
+      vertices[pi][0][1] = create_normal(vertices[pi][0][0], vertices[i][0][0], vertices[pi][1][0]);
+      vertices[pi][1][1] = create_normal(vertices[pi][1][0], vertices[pi][0][0], vertices[i][1][0]);
+      if(1 == face_count - i) {
+        vertices[i][0][1] = create_normal(vertices[i][0][0], vertices[0][0][0], vertices[i][1][0]);
+        vertices[i][1][1] = create_normal(vertices[i][1][0], vertices[i][0][0], vertices[0][1][0]);
+      }
+    }
+  }
+
+  template<std::size_t face_count, typename face_index_t = unsigned short>
+  void slot_machine_wheel(const double radius, const double width) {
+    // is_integral
+    //static_assert( std::is_same<face_index_t, unsigned short>::value || std::is_same<face_index_t, unsigned int>::value, "face_index_t must by unsigned short or unsigned int");
+    static_assert(std::is_integral<face_index_t>::value && (sizeof(face_index_t) == sizeof(short) ||
+      sizeof(face_index_t) == sizeof(int)), "face_index_t must by integer and 16 or 32 bit");
+
+    const Ogre::HardwareIndexBuffer::IndexType index_type = sizeof(face_index_t) == sizeof(unsigned short) ?
+      Ogre::HardwareIndexBuffer::IT_16BIT : Ogre::HardwareIndexBuffer::IT_32BIT;
+    const double step = 2 * M_PI / face_count;
+    const double xpos = 0;
 
     Ogre::Vector3 vertices[face_count][2][2];
-    unsigned short faces[face_count][2][3];
+    face_index_t faces[face_count][2][3];
+
     Ogre::RGBA colours[face_count][2];
     Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
 
     double rad = -M_PI;
-    for(size_t i = 0; i < face_count; ++i) {
+    for(std::size_t i = 0; i < face_count; ++i) {
       const double x = std::cos(rad);
       const double y = std::sin(rad);
       rad += step;
-      vertices[i][0][0] = Ogre::Vector3(wheel_xpos, y * radius, x * radius);
-      vertices[i][1][0] = Ogre::Vector3(wheel_xpos + wheel_width, y * radius, x * radius);
-      vertices[i][0][1] = Ogre::Vector3(0,0,1);
-      vertices[i][1][1] = Ogre::Vector3(0,0,1);
-      const int dd = i % 7; 
-      rs->convertColourValue(Ogre::ColourValue(dd & 1, dd & 2, dd & 4), &colours[i][0]);
-      rs->convertColourValue(Ogre::ColourValue(dd & 4, dd & 2, dd & 1), &colours[i][1]);
+      {
+        const int dd = i % 7; 
+        rs->convertColourValue(Ogre::ColourValue(dd & 1, dd & 2, dd & 4), &colours[i][0]);
+        rs->convertColourValue(Ogre::ColourValue(dd & 4, dd & 2, dd & 1), &colours[i][1]);
+      }
+      slot_machine_faces(faces, i);
 
-      const unsigned short ii = i * 2;
-      faces[i][0][0] = ii;
-      faces[i][0][1] = (ii + 3) % (face_count * 2);
-      faces[i][0][2] = ii + 1;
-      faces[i][1][0] = ii;
-      faces[i][1][1] = (ii + 2) % (face_count * 2);
-      faces[i][1][2] = (ii + 3) % (face_count * 2);
+      vertices[i][0][0] = Ogre::Vector3(xpos, y * radius, x * radius);
+      vertices[i][1][0] = Ogre::Vector3(xpos + width, y * radius, x * radius);
+      apply_normal(vertices, i);
     }
 
-    Ogre::VertexData* wd = new Ogre::VertexData();
-    wd->vertexCount = face_count * 2;
+    Ogre::VertexData* vd = new Ogre::VertexData();
+    vd->vertexCount = face_count * 2;
 
     /// Create declaration (memory format) of vertex data
-    Ogre::VertexDeclaration* decl = wd->vertexDeclaration;
+    Ogre::VertexDeclaration* decl = vd->vertexDeclaration;
     size_t offset = 0;
     // 1st buffer
     decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
@@ -78,10 +134,10 @@ namespace {
     /// Allocate vertex buffer of the requested number of vertices (vertexCount) 
     /// and bytes per vertex (offset)
     Ogre::HardwareVertexBufferSharedPtr vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
-      offset, wd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+      offset, vd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
     /// Upload the vertex data to the card
     vbuf->writeData(0, vbuf->getSizeInBytes(), vertices, true);
-    wd->vertexBufferBinding->setBinding(0, vbuf);
+    vd->vertexBufferBinding->setBinding(0, vbuf);
 
     // 2ed buffer
     offset = 0;
@@ -90,37 +146,21 @@ namespace {
     /// Allocate vertex buffer of the requested number of vertices (vertexCount) 
     /// and bytes per vertex (offset)
     vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
-      offset, wd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+      offset, vd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
     /// Upload the vertex data to the card
     vbuf->writeData(0, vbuf->getSizeInBytes(), colours, true);
     /// Set vertex buffer binding so buffer 1 is bound to our colour buffer
-    wd->vertexBufferBinding->setBinding(1, vbuf);
+    vd->vertexBufferBinding->setBinding(1, vbuf);
 
     /// Allocate index buffer of the requested number of vertices (ibufCount) 
     Ogre::HardwareIndexBufferSharedPtr ibuf = Ogre::HardwareBufferManager::getSingleton().
-          createIndexBuffer(Ogre::HardwareIndexBuffer::IT_16BIT, face_count * 2 * 3, 
-          Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+          createIndexBuffer(index_type, face_count * 2 * 3, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
     /// Upload the index data to the card
     ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
 
-    /// Create the mesh via the MeshManager
-    Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("SpotWheel", "General");
-    msh->sharedVertexData = wd;
-    /// Create one submesh
-    Ogre::SubMesh* sub = msh->createSubMesh();
-
-    /// Set parameters of the submesh
-    sub->useSharedVertices = true;
-    sub->indexData->indexBuffer = ibuf;
-    sub->indexData->indexCount = face_count * 2 * 3;
-    sub->indexData->indexStart = 0;
-
-    /// Set bounding information (for culling)
-    msh->_setBounds(Ogre::AxisAlignedBox(0, -radius, -radius, wheel_width, radius, radius));
-    msh->_setBoundingSphereRadius(Ogre::Math::Sqrt(radius * radius + wheel_width / 2));
-
-    /// Notify -Mesh object that it has been loaded
-    msh->load();
+    create_mash("SpotWheel", "General", vd, face_count * 2 * 3, ibuf,
+      Ogre::AxisAlignedBox(0, -radius, -radius, width, radius, radius),
+      Ogre::Math::Sqrt(radius * radius + width / 2));
 
   }
 
@@ -298,7 +338,7 @@ void tutorial4::createScene()
 
   sample_material();
   createColourCube();
-  slot_machine();
+  slot_machine_wheel<36>(200.0, 70.0);
   Ogre::Entity* thisEntity = sceneManager->createEntity("cc", "SpotWheel");
   thisEntity->setMaterialName("Test/ColourTest");
   Ogre::SceneNode* thisSceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
