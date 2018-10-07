@@ -85,6 +85,15 @@ protected:
   void set_frame_listener(frame_listener_ptr&& value);
   void set_key_listener(key_listener_ptr&& value);
   void set_mouse_listener(mouse_listener_ptr&& value);
+protected:
+  using input_manager_ptr = std::unique_ptr<OIS::InputManager, void(*)(OIS::InputManager*)>;
+protected:
+  const Ogre::String m_plugin_config;
+  const Ogre::String m_resource_config;
+  std::unique_ptr<Ogre::Root> m_root;
+  input_manager_ptr m_input_manager;
+private:
+  void windowResized();
   // Ogre::FrameListener
   bool frameStarted(const Ogre::FrameEvent& value);
   bool frameRenderingQueued(const Ogre::FrameEvent& value);
@@ -96,15 +105,6 @@ protected:
   // OIS::MouseListener  
   bool keyPressed(const OIS::KeyEvent& value) override;
   bool keyReleased(const OIS::KeyEvent& value) override;
-protected:
-  using input_manager_ptr = std::unique_ptr<OIS::InputManager, void(*)(OIS::InputManager*)>;
-protected:
-  const Ogre::String m_plugin_config;
-  const Ogre::String m_resource_config;
-  std::unique_ptr<Ogre::Root> m_root;
-  input_manager_ptr m_input_manager;
-private:
-  void windowResized();
 private:
   OgreBites::InputContext m_input_context;
   Ogre::RenderWindow* m_renderWindow = 0;

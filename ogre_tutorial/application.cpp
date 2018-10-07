@@ -59,6 +59,8 @@ void Application::startApplication()
   createScene();
   m_root->addFrameListener(this);
   m_root->startRendering();
+  m_root->removeFrameListener(this);
+
 }
 
 void Application::loadPlugins()
