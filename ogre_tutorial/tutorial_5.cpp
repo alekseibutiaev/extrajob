@@ -345,10 +345,10 @@ namespace {
 
 } /* namespace */
 
-class tutorial4
+class tutorial5
     : public Application {
 public:
-  tutorial4();
+  tutorial5();
   void createScene() override;
 private:
   bool mouse_moved(const OIS::MouseEvent& value);
@@ -367,7 +367,7 @@ private:
   int z = 0;
 };
 
-tutorial4::tutorial4() : Application("plugins.cfg", "resources-1.9.cfg") {
+tutorial5::tutorial5() : Application("plugins.cfg", "resources-1.9.cfg") {
   const std::string s = OGRE_HOME;
   start_input();
   key_listener_ptr kl = key_listener_ptr(new key_listener_ptr::element_type());
@@ -384,7 +384,7 @@ tutorial4::tutorial4() : Application("plugins.cfg", "resources-1.9.cfg") {
   set_frame_listener(std::move(fl));
 }
 
-void tutorial4::createScene()
+void tutorial5::createScene()
 {
   Ogre::SceneManager* sceneManager = create_scene_manager();
   sceneManager->setAmbientLight(Ogre::ColourValue(1.0, 1.0, 1.0));
@@ -456,20 +456,20 @@ void tutorial4::createScene()
 
 }
 
-bool tutorial4::mouse_moved(const OIS::MouseEvent& value) {
+bool tutorial5::mouse_moved(const OIS::MouseEvent& value) {
   return true;
 }
 
-bool tutorial4::mouse_pressed(const OIS::MouseEvent& value, OIS::MouseButtonID id ) {
+bool tutorial5::mouse_pressed(const OIS::MouseEvent& value, OIS::MouseButtonID id ) {
   return true;
 }
 
-bool tutorial4::mouse_released( const OIS::MouseEvent& value, OIS::MouseButtonID id ) {
+bool tutorial5::mouse_released( const OIS::MouseEvent& value, OIS::MouseButtonID id ) {
   //set_mouse_listener(mouse_listener_ptr());
   return true;
 }
 
-bool tutorial4::key_pressed(const OIS::KeyEvent& value) {
+bool tutorial5::key_pressed(const OIS::KeyEvent& value) {
   const float step = 10.0;
   const int s = 5;
   switch(value.key) {
@@ -521,12 +521,12 @@ bool tutorial4::key_pressed(const OIS::KeyEvent& value) {
   return true;
 }
 
-bool tutorial4::key_released(const OIS::KeyEvent& value) {
+bool tutorial5::key_released(const OIS::KeyEvent& value) {
   //set_key_listener(key_listener_ptr());
   return true;
 }
 
-bool tutorial4::frame_startted(const Ogre::FrameEvent& value) {
+bool tutorial5::frame_startted(const Ogre::FrameEvent& value) {
   std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
   std::chrono::system_clock::duration d = now - m_previous;
   auto c = d.count();
@@ -543,7 +543,7 @@ bool tutorial4::frame_startted(const Ogre::FrameEvent& value) {
 
   int main(int ac, char* av[]) {
   try {
-    tutorial4 app;
+    tutorial5 app;
     app.startApplication();
     return 0;
   }
