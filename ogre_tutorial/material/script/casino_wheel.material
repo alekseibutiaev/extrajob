@@ -1,0 +1,15 @@
+material casino/wheel
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.75 0.75 0.75
+
+			texture_unit
+			{
+				texture casino_while.jpeg
+			}
+		}
+	}
+}

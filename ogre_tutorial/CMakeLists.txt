@@ -68,6 +68,7 @@ add_executable(tutorial_1 tutorial_1.cpp)
 add_executable(tutorial_2 tutorial_2.cpp)
 add_executable(tutorial_3 tutorial_3.cpp)
 add_executable(tutorial_4 tutorial_4.cpp)
+add_executable(tutorial_5 tutorial_5.cpp)
 
 target_link_libraries (baseapp
   application
@@ -94,6 +95,12 @@ target_link_libraries (tutorial_3
 )
 
 target_link_libraries (tutorial_4
+  application
+  ${OGRE_LIBRARIES}
+  ${OIS_LIBRARIES}
+)
+
+target_link_libraries (tutorial_5
   application
   ${OGRE_LIBRARIES}
   ${OIS_LIBRARIES}
