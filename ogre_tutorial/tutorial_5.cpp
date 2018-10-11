@@ -347,6 +347,119 @@ namespace {
     return;
   }
 
+  void create_test_new() {
+
+    struct vertices_t {
+      Ogre::Vector3 verts;
+      Ogre::Vector3 normal;
+      Ogre::Vector2 text;
+    };
+
+    Ogre::Vector3 vertices[] = {
+      {   0.0f,   0.0f, 0.0f}, // 0
+      {  50.0f,   0.0f, 0.0f}, // 1
+      { 100.0f,   0.0f, 0.0f}, // 2
+      {   0.0f,  50.0f, 0.0f}, // 3
+      {  50.0f,  50.0f, 0.0f}, // 4
+      { 100.0f,  50.0f, 0.0f}, // 5
+      {   0.0f, 100.0f, 0.0f}, // 6
+      {  50.0f, 100.0f, 0.0f}, // 7
+      { 100.0f, 100.0f, 0.0f}, // 8
+      {   0.0f, 150.0f, 0.0f}, // 9
+      {  50.0f, 150.0f, 0.0f}, // 10
+      { 100.0f, 150.0f, 0.0f}, // 11
+      {   0.0f, 200.0f, 0.0f}, // 12
+      {  50.0f, 200.0f, 0.0f}, // 13
+      { 100.0f, 200.0f, 0.0f}, // 14
+      {   0.0f, 250.0f, 0.0f}, // 15
+      {  50.0f, 250.0f, 0.0f}, // 16
+      { 100.0f, 250.0f, 0.0f}, // 17
+    };
+
+    Ogre::Vector3 normal[] = {
+      { 0.0f, 0.0f, 1.0f }, // 0
+      { 0.0f, 0.0f, 1.0f }, // 1
+      { 0.0f, 0.0f, 1.0f }, // 2
+      { 0.0f, 0.0f, 1.0f }, // 3
+      { 0.0f, 0.0f, 1.0f }, // 4
+      { 0.0f, 0.0f, 1.0f }, // 5
+      { 0.0f, 0.0f, 1.0f }, // 6
+      { 0.0f, 0.0f, 1.0f }, // 7
+      { 0.0f, 0.0f, 1.0f }, // 8
+      { 0.0f, 0.0f, 1.0f }, // 9
+      { 0.0f, 0.0f, 1.0f }, // 10
+      { 0.0f, 0.0f, 1.0f }, // 11
+      { 0.0f, 0.0f, 1.0f }, // 12
+      { 0.0f, 0.0f, 1.0f }, // 13
+      { 0.0f, 0.0f, 1.0f }, // 14
+      { 0.0f, 0.0f, 1.0f }, // 15
+      { 0.0f, 0.0f, 1.0f }, // 16
+      { 0.0f, 0.0f, 1.0f }, // 17
+    };
+
+    Ogre::Vector2 text[] = {
+      { 0.0f, 0.0f }, // 0
+      { 0.5f, 0.0f }, // 1
+      { 1.0f, 0.0f }, // 2
+      { 0.0f, 0.2f }, // 3
+      { 0.5f, 0.2f }, // 4
+      { 1.0f, 0.2f }, // 5
+      { 0.0f, 0.4f }, // 6
+      { 0.5f, 0.4f }, // 7
+      { 1.0f, 0.4f }, // 8
+      { 0.0f, 0.6f }, // 9
+      { 0.5f, 0.6f }, // 10
+      { 1.0f, 0.6f }, // 11
+      { 0.0f, 0.8f }, // 12
+      { 0.5f, 0.8f }, // 13
+      { 1.0f, 0.8f }, // 14
+      { 0.0f, 1.0f }, // 15
+      { 0.5f, 1.0f }, // 16
+      { 1.0f, 1.0f }, // 17
+    };
+
+    unsigned short faces[20][3] = {
+      { 0, 1, 4 }, { 0, 4, 3 }, { 1, 2, 5 }, { 1, 5, 4 },
+      { 3, 4, 7 }, { 3, 7, 6 }, { 4, 5, 8 }, { 4, 8, 7 },
+      { 6, 7, 10 }, { 6, 10, 9}, { 7, 8, 11 }, { 1, 11, 10},
+      { 9, 10, 13}, { 9, 13, 12}, { 10, 11, 14 }, { 10, 14, 13 },
+      { 12, 13, 16}, { 12, 16, 15}, { 13, 14, 17}, { 13, 17, 16},
+    };
+
+    Ogre::VertexData* vd = new Ogre::VertexData();
+    vd->vertexCount = array_size(vertices);
+    Ogre::VertexDeclaration* mDecl = vd->vertexDeclaration;
+    mDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    mDecl->addElement(1, 0, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+    mDecl->addElement(2, 0, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+
+    Ogre::HardwareVertexBufferSharedPtr vbuf_vertex = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+      sizeof(Ogre::Vector3), vd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    vbuf_vertex->writeData(0, vbuf_vertex->getSizeInBytes(), vertices, true);
+
+    Ogre::HardwareVertexBufferSharedPtr vbuf_normal = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+      sizeof(Ogre::Vector3), vd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    vbuf_normal->writeData(0, vbuf_normal->getSizeInBytes(), normal, true);
+
+    Ogre::HardwareVertexBufferSharedPtr vbuf_text = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+      sizeof(Ogre::Vector2), vd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    vbuf_text->writeData(0, vbuf_text->getSizeInBytes(), text, true);
+
+    vd->vertexBufferBinding->setBinding(0, vbuf_vertex);
+    vd->vertexBufferBinding->setBinding(1, vbuf_normal);
+    vd->vertexBufferBinding->setBinding(2, vbuf_text);
+
+    Ogre::HardwareIndexBufferSharedPtr ibuf = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(
+            Ogre::HardwareIndexBuffer::IT_16BIT, 60, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
+
+    create_mash("patch1", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, vd, ibuf,
+      Ogre::AxisAlignedBox( 0.0f, 0.0f, 0.0f, 100.0f, 250.0f, 0),
+      Ogre::Math::Sqrt(50.0f * 50.0f + 125.0f * 125.0f) );
+    return;
+  }
+
+
 } /* namespace */
 
 class tutorial5
@@ -409,29 +522,25 @@ void tutorial5::createScene()
   light->setPosition(0.0f, 0.0f, 0.120f);
 
   Ogre::SceneNode* node;
+  Ogre::Entity* ent;
   sample_material();
   createColourCube();
-  createColourCube();
+  create_test();
+  create_test_new();
 
-#if 0
   slot_machine_wheel<36>(200.0, 125.6);
-  Ogre::Entity* thisEntity = sceneManager->createEntity("sw", "SpotWheel");
-  thisEntity->setMaterialName("Test/ColourTest");
+  ent = sceneManager->createEntity("sw", "SpotWheel");
+  ent->setMaterialName("Test/ColourTest");
   node = sceneManager->getRootSceneNode()->createChildSceneNode();
   node->setPosition(0, 0, 0);
-  //  node->yaw(Ogre::Radian(1.0));
-  //node->pitch(Ogre::Radian(1.0));
-  node->attachObject(thisEntity);
+  node->attachObject(ent);
   sw = node;
 
-  /*Ogre::Entity**/ thisEntity = sceneManager->createEntity("sw1", "SpotWheel");
-  thisEntity->setMaterialName("Test/ColourTest");
+  ent = sceneManager->createEntity("sw1", "SpotWheel");
+  ent->setMaterialName("Test/ColourTest");
   node = sceneManager->getRootSceneNode()->createChildSceneNode();
   node->setPosition(-125.6, 0, 0);
-  //  node->yaw(Ogre::Radian(1.0));
-  //node->pitch(Ogre::Radian(1.0));
-  node->attachObject(thisEntity);
-#endif
+  node->attachObject(ent);
 #if 0
   /*Ogre::Entity**/ thisEntity = sceneManager->createEntity("cc", "ColourCube");
   thisEntity->setMaterialName("Test/ColourTest");
@@ -441,23 +550,18 @@ void tutorial5::createScene()
   node->yaw(Ogre::Radian(1.0));
   node->pitch(Ogre::Radian(1.0));
 #endif
-#if 1
-  try {
-    create_test();
     // create a patch entity from the mesh, give it a material, and attach it to the origin
-    Ogre::Entity* ent = sceneManager->createEntity("Patch", "patch");
+    ent = sceneManager->createEntity("Patch", "patch");
     ent->setMaterialName("casino/wheel");
     node = sceneManager->getRootSceneNode()->createChildSceneNode();
     node->attachObject(ent);
-    sw = node;
-    // save the main pass of the material so we can toggle wireframe on it
-    //Ogre::Pass* mPatchPass = ent->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0);
-  }
-  catch (const std::exception& e) {
-    std::cout << e.what() << std::endl; 
-  }
-#endif
-
+    node->setPosition(125.6, 0, 0);
+    // create a patch entity from the mesh, give it a material, and attach it to the origin
+    ent = sceneManager->createEntity("Patch1", "patch1");
+    ent->setMaterialName("casino/wheel");
+    node = sceneManager->getRootSceneNode()->createChildSceneNode();
+    node->attachObject(ent);
+    node->setPosition(225.6, 0, 0);
 }
 
 bool tutorial5::mouse_moved(const OIS::MouseEvent& value) {
