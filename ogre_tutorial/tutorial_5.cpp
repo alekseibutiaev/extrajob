@@ -32,7 +32,7 @@ namespace {
       material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_AMBIENT);
   }
 
-  void create_mash(const Ogre::String& name, const Ogre::String& group, Ogre::VertexData* vd, std::size_t count,
+  void create_mash(const Ogre::String& name, const Ogre::String& group, Ogre::VertexData* vd,
       Ogre::HardwareIndexBufferSharedPtr ibuf, const Ogre::AxisAlignedBox& box, const double radius) {
       /// Create the mesh via the MeshManager
     Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual(name, group);
@@ -43,7 +43,7 @@ namespace {
     /// Set parameters of the submesh
     sub->useSharedVertices = true;
     sub->indexData->indexBuffer = ibuf;
-    sub->indexData->indexCount = count;
+    sub->indexData->indexCount = ibuf->getNumIndexes();
     sub->indexData->indexStart = 0;
 
     /// Set bounding information (for culling)
@@ -158,7 +158,7 @@ namespace {
     /// Upload the index data to the card
     ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
 
-    create_mash("SpotWheel", "General", vd, face_count * 2 * 3, ibuf,
+    create_mash("SpotWheel", "General", vd, ibuf,
       Ogre::AxisAlignedBox(0, -radius, -radius, width, radius, radius),
       Ogre::Math::Sqrt(radius * radius + (width/2) * (width/2)));
 
@@ -290,6 +290,7 @@ namespace {
   }
 
   void create_test() {
+
     struct vertices_t {
       Ogre::Vector3 verts;
       Ogre::Vector3 normal;
@@ -297,50 +298,53 @@ namespace {
     };
 
     vertices_t vertices[] = {
-      { {   0.0f,   0.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
-      { {  50.0f,   0.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.0f } },
-      { { 100.0f,   0.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f } },
-      { {   0.0f,  50.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.2f } },
-      { {  50.0f,  50.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.2f } },
-      { { 100.0f,  50.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.2f } },
-      { {   0.0f, 100.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.4f } },
-      { {  50.0f, 100.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.4f } },
-      { { 100.0f, 100.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.4f } },
-      { {   0.0f, 150.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.6f } },
-      { {  50.0f, 150.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.6f } },
-      { { 100.0f, 150.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.6f } },
-      { {   0.0f, 200.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.8f } },
-      { {  50.0f, 200.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.8f } },
-      { { 100.0f, 200.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.8f } },
-      { {   0.0f, 250.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } },
-      { {  50.0f, 250.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 1.0f } },
-      { { 100.0f, 250.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } },
+      { {   0.0f,   0.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } }, // 0
+      { {  50.0f,   0.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.0f } }, // 1
+      { { 100.0f,   0.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f } }, // 2
+      { {   0.0f,  50.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.2f } }, // 3
+      { {  50.0f,  50.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.2f } }, // 4
+      { { 100.0f,  50.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.2f } }, // 5
+      { {   0.0f, 100.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.4f } }, // 6
+      { {  50.0f, 100.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.4f } }, // 7
+      { { 100.0f, 100.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.4f } }, // 8
+      { {   0.0f, 150.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.6f } }, // 9
+      { {  50.0f, 150.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.6f } }, // 10
+      { { 100.0f, 150.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.6f } }, // 11
+      { {   0.0f, 200.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.8f } }, // 12
+      { {  50.0f, 200.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.8f } }, // 13
+      { { 100.0f, 200.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 0.8f } }, // 14
+      { {   0.0f, 250.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } }, // 15
+      { {  50.0f, 250.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 0.5f, 1.0f } }, // 16
+      { { 100.0f, 250.0f, 0.0f}, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } }, // 17
     };
 
-    Ogre::VertexDeclaration* mDecl;
-    Ogre::PatchMeshPtr mPatch;
-		// specify a vertex format declaration for our patch: 3 floats for position, 3 floats for normal, 2 floats for UV
-    mDecl = Ogre::HardwareBufferManager::getSingleton().createVertexDeclaration();
+    unsigned short faces[20][3] = {
+      { 0, 1, 4 }, { 0, 4, 3 }, { 1, 2, 5 }, { 1, 5, 4 },
+      { 3, 4, 7 }, { 3, 7, 6 }, { 4, 5, 8 }, { 4, 8, 7 },
+      { 6, 7, 10 }, { 6, 10, 9}, { 7, 8, 11 }, { 1, 11, 10},
+      { 9, 10, 13}, { 9, 13, 12}, { 10, 11, 14 }, { 10, 14, 13 },
+      { 12, 13, 16}, { 12, 16, 15}, { 13, 14, 17}, { 13, 17, 16},
+    };
+
+    Ogre::VertexData* vd = new Ogre::VertexData();
+    vd->vertexCount = array_size(vertices);
+    Ogre::VertexDeclaration* mDecl = vd->vertexDeclaration;
     mDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     mDecl->addElement(0, sizeof(float) * 3, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
     mDecl->addElement(0, sizeof(float) * 6, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
-    
-		// create a patch mesh using vertices and declaration
-    mPatch = Ogre::MeshManager::getSingleton().createBezierPatch("patch", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-      (float*)vertices, mDecl, 3, 6, -1, -1,  Ogre::PatchSurface::VS_BOTH);
+    Ogre::HardwareVertexBufferSharedPtr vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+      sizeof(vertices_t), vd->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    vbuf->writeData(0, vbuf->getSizeInBytes(), vertices, true);
+    vd->vertexBufferBinding->setBinding(0, vbuf);
 
-    mPatch->setSubdivision(0);   // start at 0 detail
+    Ogre::HardwareIndexBufferSharedPtr ibuf = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(
+            Ogre::HardwareIndexBuffer::IT_16BIT, 60, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
 
-/*
-		// create a patch entity from the mesh, give it a material, and attach it to the origin
-    Ogre::Entity* ent = mSceneMgr->createEntity("patch", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-		ent->setMaterialName("casion/wheel");
-    mSceneMgr->getRootSceneNode()->attachObject(ent);
-
-		// save the main pass of the material so we can toggle wireframe on it
-		mPatchPass = ent->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0);
-*/
-
+    create_mash("patch", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, vd, ibuf,
+      Ogre::AxisAlignedBox( 0.0f, 0.0f, 0.0f, 100.0f, 250.0f, 0),
+      Ogre::Math::Sqrt(50.0f * 50.0f + 125.0f * 125.0f) );
+    return;
   }
 
 } /* namespace */
@@ -541,7 +545,7 @@ bool tutorial5::frame_startted(const Ogre::FrameEvent& value) {
   return true;
 }
 
-  int main(int ac, char* av[]) {
+int main(int ac, char* av[]) {
   try {
     tutorial5 app;
     app.startApplication();
