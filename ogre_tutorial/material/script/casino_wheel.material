@@ -13,3 +13,18 @@ material casino/wheel
 		}
 	}
 }
+material casino/wheel1
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.75 0.75 0.75
+
+			texture_unit
+			{
+				texture drawing.jpeg
+			}
+		}
+	}
+}
